@@ -60,16 +60,14 @@ while WINDOW_OPEN:
             login = False
             WINDOW_OPEN = False
 
-        if time_spent > 0.5:
-            print(f"FPS: {math.floor(1 / delta_time):03}")
-            time_spent = 0
+        # if time_spent > 0.5:
+        #     print(f"FPS: {math.floor(1 / delta_time):03}")
+        #     time_spent = 0
 
         pygame.display.flip()
 
     if not loaded_player_stats:
         load_player_stats(PLAYER_NAME, stats)
-
-    show_stats(stats) # DEBUG, pol zbrisi
 
     faded_in = False
     play_button_already_clicked = False
@@ -136,9 +134,9 @@ while WINDOW_OPEN:
             main_menu = False
             save_player_stats(PLAYER_NAME, stats)
 
-        if time_spent > 0.5:
-            print(f"FPS: {math.floor(1 / delta_time):03}")
-            time_spent = 0
+        # if time_spent > 0.5:
+        #     print(f"FPS: {math.floor(1 / delta_time):03}")
+        #     time_spent = 0
 
         pygame.display.flip()
 
@@ -258,9 +256,9 @@ while WINDOW_OPEN:
             main_menu = False
             endscreen = False
 
-        if time_spent > 0.5:
-            print(f"FPS: {math.floor(1 / delta_time):03}")
-            time_spent = 0
+        # if time_spent > 0.5:
+        #     print(f"FPS: {math.floor(1 / delta_time):03}")
+        #     time_spent = 0
 
         effect.update(delta_time, screen)
         pygame.display.flip()
