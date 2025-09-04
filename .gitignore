@@ -1,0 +1,4 @@
+stats/
+__pycache__/
+backup_jump_king.py
+*.pyc
