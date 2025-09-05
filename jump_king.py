@@ -8,6 +8,7 @@ from modules.utils import log_in, draw_scene, load_player_stats, save_player_sta
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Jump King")
+pygame.display.set_icon(f"{resources_folder}/other/icon.png")
 
 while WINDOW_OPEN:
     music.main_menu()
