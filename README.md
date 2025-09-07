@@ -9,7 +9,7 @@ A simple clone of **Jump King**, built with [Python](https://www.python.org/) an
 - Load levels from file
 
 ## How to play (Linux)
-1. Download zipped folder from [Releases](https://github.com/tinkajob/jump-king/r.eleases).
+1. Download zipped folder from [Releases](https://github.com/tinkajob/jump-king/releases).
 2. Extract it to where you'd like to have game stored.
 3. Locate Jump King binary and double-click it to run the game.
 4. Enter username and password, and it will automatically create new profile if that username is not already taken (you can check in stats/).
