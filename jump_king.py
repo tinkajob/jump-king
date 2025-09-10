@@ -3,13 +3,7 @@ import pygame, sys, math
 from modules.config import *
 from modules.objects import *
 from modules.pygame_objects import *
-from modules.utils import (
-    log_in,
-    draw_scene,
-    load_player_stats,
-    save_player_stats,
-    show_stats,
-)
+from modules.utils import log_in, draw_scene, load_player_stats, save_player_stats
 
 pygame.init()
 pygame.mixer.init()
