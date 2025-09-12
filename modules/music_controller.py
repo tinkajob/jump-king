@@ -1,6 +1,6 @@
 import pygame
 
-from modules.config import next_scene, musics
+from modules.config import musics
 
 class MusicController:
     def __init__(self):
