@@ -20,7 +20,7 @@ game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
 }
 stats = {}
 def_stats = { #all time (per-user stats, primer: total jumps, min_jumps_in_game)
-    "password": 0,                      #DONE
+    "password": 0,                              #DONE
     "total_playtime": 0,
     "personal_best_time": 0,
     "avg_completion_time": 0,

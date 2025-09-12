@@ -7,8 +7,6 @@ from modules.ui import Text, Button, InputField, FadeManager, Cursor
 
 level_paths = detect_levels(levels_folder, level_paths)
 
-print(level_paths)
-
 levels, level_surfaces = [], []
 for i in range(len(level_paths)):
     platforms = create_level(load_level_from_file(i))
