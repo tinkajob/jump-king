@@ -1,9 +1,13 @@
-from modules.config import level_paths, SCREEN_HEIGHT, SCREEN_WIDTH, player_size, current_level, coordinates, sizes, title_text
+from modules.config import level_paths, SCREEN_HEIGHT, SCREEN_WIDTH, player_size, current_level, coordinates, sizes, title_text, levels_folder
 from modules.player_controller import PlayerController
 from modules.npcs import BabeController
-from modules.utils import create_level, load_level_from_file, create_level_surface
+from modules.utils import create_level, load_level_from_file, create_level_surface, detect_levels
 from modules.music_controller import MusicController
 from modules.ui import Text, Button, InputField, FadeManager, Cursor
+
+level_paths = detect_levels(levels_folder, level_paths)
+
+print(level_paths)
 
 levels, level_surfaces = [], []
 for i in range(len(level_paths)):

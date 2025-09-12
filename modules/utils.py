@@ -272,9 +272,12 @@ def update_player_stats(stats):
     if stats["highest_distance_descended_in_game"] < game_stats["distance_descended"]:
         stats["highest_distance_descended_in_game"] = game_stats["distance_descended"]
 
-def show_stats(stats):
-    for item in stats:
-        print(f"{item}: {stats[item]}")
+def detect_levels(levels_folder, level_paths):
+    for root, _, files in os.walk(f"{levels_folder}"): # root in _ sta ztu kr os.walk vrne tuple 3 stvari, ampak mi rabmo samo seznam filesov
+        for file in files:
+            level_paths.append(f"{levels_folder}/{file}")
+    level_paths.sort()
+    return level_paths
 
 def create_level_surface(level):
     level_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)

@@ -5,12 +5,7 @@ current_level, current_frame, time_spent = 0, 0, 0
 start_time, hours, minutes, seconds = 0, 0, 0, 0
 tile_size = 40
 stats_folder, levels_folder, resources_folder = "stats", "levels", "resources"
-level_paths = [
-    "levels/level1.txt",
-    "levels/level2.txt",
-    "levels/level3.txt",
-    "levels/level4.txt",
-]
+level_paths = []
 game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "jumps": 0,
     "falls": 0,
