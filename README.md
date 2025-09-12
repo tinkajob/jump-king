@@ -16,7 +16,7 @@ A simple clone of **Jump King**, built with [Python](https://www.python.org/) an
    If you want to play as guest (shared stats) just leave both input fields empty.
 5. Click "Submit" to log in.
 
-> *Bonus: you can edit existing levels, or you can add new levels (create new .txt file, level dimentions are 33 x 25 tiles, 1 - ground, 0 - air). LEVELS ARE SORTED APLHABETICALLY*
+> *Bonus: you can add new levels/edit existing levels.*
 
 
 ## Contributing
