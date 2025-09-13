@@ -16,7 +16,7 @@ A simple clone of **Jump King**, built with [Python](https://www.python.org/) an
    If you want to play as guest (shared stats) just leave both input fields empty.
 5. Click "Submit" to log in.
 
-> *Bonus: you can edit existing levels, but adding new ones is not yet supported (auto-detection coming soon).*
+> *Bonus: you can add new or edit existing levels!*
 
 
 ## Contributing
