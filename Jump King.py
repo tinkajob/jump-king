@@ -16,6 +16,7 @@ while WINDOW_OPEN:
     submit_button_already_clicked = False
     faded_in = False
 
+    clock.tick()
     while login:
         if not faded_in:
             effect.start_fade_in()
@@ -60,10 +61,6 @@ while WINDOW_OPEN:
         if next_scene == "quit" and not effect.get_active():
             login = False
             WINDOW_OPEN = False
-
-        # if time_spent > 0.5:
-        #     print(f"FPS: {math.floor(1 / delta_time):03}")
-        #     time_spent = 0
 
         pygame.display.flip()
 
@@ -134,10 +131,6 @@ while WINDOW_OPEN:
             login = True
             main_menu = False
             save_player_stats(PLAYER_NAME, stats)
-
-        # if time_spent > 0.5:
-        #     print(f"FPS: {math.floor(1 / delta_time):03}")
-        #     time_spent = 0
 
         pygame.display.flip()
 
@@ -256,10 +249,6 @@ while WINDOW_OPEN:
             WINDOW_OPEN = False
             main_menu = False
             endscreen = False
-
-        # if time_spent > 0.5:
-        #     print(f"FPS: {math.floor(1 / delta_time):03}")
-        #     time_spent = 0
 
         effect.update(delta_time, screen)
         pygame.display.flip()

@@ -5,7 +5,9 @@ from modules.platform import Platform
 import modules.objects as objects
 from modules.pygame_objects import endscreens, scaled_bgs, tile_images
 
-def log_in(username, password, title, effect, username_input, password_input, username_text, password_text, stats):
+def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, username_text:str, password_text:str, stats:list):
+    """Handles user login and account creation based on provided inputs."""
+
     load_player_stats(username, stats)
     if username != "" and username.lower() != "guest": #ce je player
         if stats.get("password", 0) == 0:
@@ -36,11 +38,14 @@ def log_in(username, password, title, effect, username_input, password_input, us
         
     save_player_stats(username, stats)
 
-def hash_password(password):
+def hash_password(password:str):
+    """Encrypts password using hash function"""
     password = str(password)
     return hashlib.sha256(password.encode()).hexdigest()
 
-def load_level_from_file(level_number):
+def load_level_from_file(level_number:int):
+    """Based on ***level_number*** loads level data from file to list named ***level***"""
+
     level = []
     with open(level_paths[level_number], 'r') as file:
         for line_number, line in enumerate(file, start = 1):
@@ -51,7 +56,9 @@ def load_level_from_file(level_number):
             level.append(row)
     return level
 
-def create_level(level_data):
+def create_level(level_data:list):
+    """Based on list ***level_data***, which has level data stored inside creates level *(all the platforms for that level)*"""
+
     rows = len(level_data)
     cols = len(level_data[0]) if rows > 0 else 0
     platforms = []
@@ -73,7 +80,9 @@ def create_level(level_data):
                 platforms.append(Platform(col_index * tile_size, row_index * tile_size, tile_size, tile_size, autotile(neighbors)))
     return platforms 
 
-def autotile(neighbors):
+def autotile(neighbors:list):
+    """Based on list ***neighbors*** chooses correct image for each tile to display"""
+
     if neighbors[1] == 0 and neighbors[3] == 0 and neighbors[4] == 0 and neighbors[6] == 0: #enojna
         return 0
     if neighbors[0] == 1 and neighbors[1] == 1 and neighbors[2] == 1 and neighbors[3] == 1 and neighbors[4] == 1 and neighbors[5] == 1 and neighbors[6] == 1 and neighbors[7]== 1: #cela polna
@@ -174,7 +183,9 @@ def autotile(neighbors):
         return 46
     return 0 #prepisi da bo ku binary tree?
 
-def draw_scene(scene, screen, current_level = 0, delta_time = 0):
+def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_time:float = 0):
+    """Handles drawing scenes"""
+
     if scene == "main_menu":
         screen.blit(scaled_bgs[0], (-600, 0))
         objects.play_button.draw(screen)
@@ -209,7 +220,8 @@ def draw_scene(scene, screen, current_level = 0, delta_time = 0):
         objects.password_text.draw(screen)
         objects.cursor.draw(screen, delta_time)
 
-def save_player_stats(PLAYER_NAME, stats):
+def save_player_stats(PLAYER_NAME:str, stats:list):
+    """Saves player stats to its corresponding file"""
     os.makedirs(stats_folder, exist_ok=True)
     update_player_stats(stats)
 
@@ -221,7 +233,8 @@ def save_player_stats(PLAYER_NAME, stats):
     with open(filepath, "w") as file:
         json.dump(stats, file, indent = 4)
 
-def load_player_stats(PLAYER_NAME, stats):
+def load_player_stats(PLAYER_NAME:str, stats:list):
+    """Loads player stats from its corresponding file"""
     if PLAYER_NAME != "":
         filepath = os.path.join(stats_folder, f"{PLAYER_NAME}_stats.json")
     else:
@@ -240,12 +253,14 @@ def load_player_stats(PLAYER_NAME, stats):
         if key not in stats:
             stats[key] = value
 
-def wipe_stats(stats):
+def wipe_stats(PLAYER_NAME:str, stats:list):
+    """Resets all player values to 0 and saves them"""
     for stat in stats:
         stats[stat] = 0
-    save_player_stats()
+    save_player_stats(PLAYER_NAME, stats)
 
-def update_player_stats(stats):
+def update_player_stats(stats:list):
+    """Updates player stats based on stats from his last game"""
     #tle do pravila za use statse kku se jih zdruzuje
     stats["total_jumps"] += game_stats["jumps"]
     if stats["min_jumps_in_game"] > game_stats["jumps"]:
@@ -272,14 +287,17 @@ def update_player_stats(stats):
     if stats["highest_distance_descended_in_game"] < game_stats["distance_descended"]:
         stats["highest_distance_descended_in_game"] = game_stats["distance_descended"]
 
-def detect_levels(levels_folder, level_paths):
+def detect_levels(levels_folder:str, level_paths:list):
+    """Goes trough all files in given folder and adds them to list of levels *(ordered alphabetically)*"""
     for root, _, files in os.walk(f"{levels_folder}"): # root in _ sta ztu kr os.walk vrne tuple 3 stvari, ampak mi rabmo samo seznam filesov
         for file in files:
-            level_paths.append(f"{levels_folder}/{file}")
+            if file.endswith(".txt"):
+                level_paths.append(f"{levels_folder}/{file}")
     level_paths.sort()
     return level_paths
 
 def create_level_surface(level):
+    """Creates level surface by combining all platforms/tiles into one surface"""
     level_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 
     for platform in level:
