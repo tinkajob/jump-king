@@ -3,13 +3,14 @@ import pygame
 from modules.config import musics
 
 class MusicController:
-    def __init__(self):
+    def __init__(self:object):
+        """Creates a music controller object"""
         self.current_song = ""
         self.is_fading_out = False
         self.fade_duration = 1000
 
-    def play(self, current_level, endscreen, fadeout = ""):
-        
+    def play(self:object, current_level:int, endscreen:bool, fadeout:str = ""):
+        """Plays the correct song based on the input"""
         if not pygame.mixer.music.get_busy():
             self.is_fading_out = False
         if not self.is_fading_out:
@@ -36,6 +37,7 @@ class MusicController:
                 self.current_song = "sunrise"
                 pygame.mixer.music.play(-1)
 
-    def main_menu(self):
+    def main_menu(self:object):
+        """Plays the main menu music"""
         pygame.mixer.music.load(musics["main_menu"])
         pygame.mixer.music.play(-1)

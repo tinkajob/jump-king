@@ -4,7 +4,8 @@ from modules.config import max_speed, gravity, jump_power, game_stats, SCREEN_HE
 from modules.pygame_objects import player_images, bounce_channel, sfx
 
 class PlayerController:
-    def __init__(self, x_pos, y_pos, size):
+    def __init__(self:object, x_pos:int, y_pos:int, size:int):
+        """Creates a player object"""
         self.rect = pygame.Rect(x_pos, y_pos, 60, 69)
         self.collision_top_rect = pygame.Rect(x_pos + 9, y_pos - 1, 42, 1) # okej
         self.collision_bottom_rect = pygame.Rect(x_pos + 5, y_pos + size, 50, 1) #okej
@@ -32,17 +33,20 @@ class PlayerController:
         self.time_charged = 0
         self.friction = 1
 
-    def draw(self, screen):
+    def draw(self:object, screen:pygame.Surface):
+        """Draws the player on the screen"""
         if self.speed_x < 0 or self.direction == "left":
             screen.blit(pygame.transform.flip(player_images[self.current_frame], True, False), (self.rect.x - 6, self.rect.y - 11))
         else:
             screen.blit(player_images[self.current_frame], (self.rect.x - 6, self.rect.y - 11))
 
-    def reset_position(self, x_pos, y_pos):
+    def reset_position(self:object, x_pos:int, y_pos:int):
+        """Resets player position"""
         self.rect.x = x_pos
         self.rect.y = y_pos
 
-    def animate(self, keys, delta_time, current_level):
+    def animate(self:object, keys:list, delta_time:float, current_level:int):
+        """Sets the correct frame for the player object to draw"""
         if self.speed_x == 0:
             if (not any(keys)) or ((keys[pygame.K_LEFT] or keys[pygame.K_a]) and (keys[pygame.K_RIGHT] or keys[pygame.K_d])):
                 self.current_frame = 0
@@ -73,7 +77,8 @@ class PlayerController:
                 self.jumped_from_level = current_level
                 self.jumped_from_y = self.rect.y
 
-    def move(self, delta_time, keys, current_level, level, levels):
+    def move(self:object, delta_time:float, keys:list, current_level:int, level:list, levels:list):
+        """Handles player movement based on the input"""
         self.friction, level, current_level = self.check_borders(current_level, level, levels)
 
         self.time_since_pressed_left -= delta_time
@@ -171,7 +176,8 @@ class PlayerController:
         keys = []
         return level, current_level
 
-    def check_borders(self, current_level, level, levels):
+    def check_borders(self:object, current_level:int, level:list, levels:list):
+        """Checks if the player is colliding with window borders"""
         self.is_not_allowed_to_move = ""
         if self.rect.right > SCREEN_WIDTH: # RIGHT
             self.rect.right = SCREEN_WIDTH
@@ -219,7 +225,8 @@ class PlayerController:
                 self.head_bounce = True
         return 1, level, current_level
     
-    def check_collision_with_platforms(self, current_level, level):
+    def check_collision_with_platforms(self:object, current_level:int, level:list):
+        """Checks if the player is colliding with the platforms"""
         self.touched_floor = False
         self.has_collided_prev_frame = self.has_collided_this_frame
         for platform in level:
@@ -333,7 +340,8 @@ class PlayerController:
                         self.times_bounced_midair += 1
                     return
 
-    def reset_values(self):
+    def reset_values(self:object):
+        """Resets all player values"""
         self.speed_y = self.speed_x = 0
         self.touched_floor = False
         self.jump_charge = 0
