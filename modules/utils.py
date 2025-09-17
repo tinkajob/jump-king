@@ -219,6 +219,7 @@ def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_ti
         objects.username_text.draw(screen)
         objects.password_text.draw(screen)
         objects.cursor.draw(screen, delta_time)
+        objects.notification.draw(screen)
 
 def save_player_stats(PLAYER_NAME:str, stats:list):
     """Saves player stats to its corresponding file"""

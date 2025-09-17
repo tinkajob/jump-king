@@ -36,6 +36,9 @@ while WINDOW_OPEN:
         password_input.capture_input(events, username_text, password_text)
         cursor.update()
 
+        # notification.is_clicked()
+        # notification.update()
+
         if submit_button.is_clicked():
             if not submit_button_already_clicked:
                 sfx["click"].play()

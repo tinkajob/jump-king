@@ -94,6 +94,7 @@ fonts = {
     "title": pygame.font.Font(f"{resources_folder}/other/font.otf", 70),
     "timer": pygame.font.Font(None, 36),
     "bold" : pygame.font.Font(None, 50),
+    "notification": pygame.font.Font(None, 30),
 }
 scaled_bgs = [
     pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/menu_bg.jpg").convert(), (1920, 1000)), # menu

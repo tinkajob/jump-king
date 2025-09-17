@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, textwrap
 from modules.config import colors
 from modules.pygame_objects import fonts, buttons
 
@@ -23,11 +23,51 @@ class Text:
         """Draws text on the screen"""
         screen.blit(self.surface, self.rect)
 
-    def update(self:object):
+    def update(self:object, max_width:int = 0, font:str = "notification"):
         """Updates text and re-renders its surface"""
         self.surface = fonts[self.font].render(self.text, True, self.color)
         self.rect = self.surface.get_rect(center = self.pos)
-        return self.rect
+        
+        self.wrap(max_width, font)
+
+        #Splits lines based on \n char and renders all lines into 1 surface
+        lines = self.text.splitlines()
+        rendered_lines = []
+        for line in lines:
+            rendered_lines.append(fonts[self.font].render(line, True, self.color))
+
+        text_width, text_height = 0, 0
+        for line in rendered_lines:
+            text_height += line.get_height()
+            text_width = max(text_width, line.get_width())
+
+        self.surface = pygame.Surface((text_width, text_height), pygame.SRCALPHA)
+
+        y = 0
+        for line in rendered_lines:
+            self.surface.blit(line, (0, y))
+            y += line.get_height()
+
+        self.rect = self.surface.get_rect(center=self.pos)
+    
+    def wrap(self:object, max_width:int = 0, font:str = "notification"):
+        if max_width == 0:
+            return
+
+        words = self.text.split()
+        self.text = words[0]
+        current_line_width = 0
+        space_width = fonts[font].size(" ")[0]
+        words
+        for word in words[1:]:
+            word_width = fonts[font].size(word)[0]
+            if current_line_width + word_width + space_width <= max_width:
+                self.text = self.text + " " + word
+                lines = self.text.split("\n")
+                current_line_width = fonts[font].size(lines[len(lines) - 1])[0]
+            else:
+                self.text = self.text + "\n" + word
+                current_line_width = 0
 
 class InputField:
     def __init__(self:object, pos_tuple:tuple [int, int], dimentions:tuple [int, int], mask_input:bool, type:str):
@@ -216,3 +256,46 @@ class FadeManager:
     def get_active(self:object):
         """Returns if effect is active or not"""
         return self.is_active
+    
+class Notification:
+    def __init__(self:object, pos_tuple:tuple [int, int], size_tuple:tuple [int, int], text:str):
+        """Creates a notification object"""
+        self.rect = pygame.Rect(pos_tuple[0], pos_tuple[1], size_tuple[0], size_tuple[1])
+        self.text = Text(text, "white", "notification", self.rect.center)
+        self.max_width = 700
+        self.margin = 25
+        self.is_visible = True
+        self.color = colors["grey_dark"]
+        self.has_been_pressed = False
+
+    def draw(self, screen:pygame.Surface):
+        """If allowed, draws notification on screen"""
+        if not self.is_visible:
+            return
+        
+        pygame.draw.rect(screen, self.color, self.rect, 0, 25)
+        self.text.draw(screen)
+
+    def update(self:object):
+        """Updates its rect and position"""
+        self.text.update(self.max_width - (2 * self.margin), "notification")
+        self.rect.x = self.text.rect.x - self.margin
+        self.rect.width = self.text.rect.width + (2 * self.margin)
+        self.rect.height = self.text.rect.height + (2 * self.margin)
+        self.rect.y = 950 - (self.text.rect.height + (2 * self.margin))
+        
+        if self.rect.width > self.max_width:
+            self.rect.width = self.max_width
+
+        self.text.rect.center = self.rect.center
+
+    def is_clicked(self:object):
+        mouse_pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(mouse_pos):
+            if pygame.mouse.get_pressed()[0]:
+                self.has_been_pressed = True
+            elif self.has_been_pressed:
+                self.has_been_pressed = False
+                self.is_visible = False
+                return True
+            return False
