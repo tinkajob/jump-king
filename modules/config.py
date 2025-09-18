@@ -82,6 +82,7 @@ play_button_already_clicked, quit_button_already_clicked, submit_button_already_
 #============================= USER INTERFACE =============================
 faded_in = False
 game_ended = False
+bg_resize_koeficient = 1.05
 next_scene = "login"
 title_text = "Welcome!"
 sizes = {
@@ -114,5 +115,11 @@ colors = {
     "mint_bright": (115, 255, 140),     #SVETLA mint zelena
     "red_dark": (180, 0, 0),            #TEMNA rdeca
     "yellow_dark": (200, 200, 85),      #TEMNO RUMENA
+}
+messages = {
+    "greeting_back": f"Welcome back, {PLAYER_NAME}",
+    "greeting_new": f"Welcome, {PLAYER_NAME}",
+    "greeting_guest": f"Logged in as guest. You are using shared stats.",
+    "err_password": f"ERROR logging in!\nPassword you entered is incorrect!"
 }
 #============================= USER INTERFACE =============================

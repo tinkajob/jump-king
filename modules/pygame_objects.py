@@ -1,7 +1,7 @@
 import pygame
 pygame.init()
 
-from modules.config import SCREEN_HEIGHT, SCREEN_WIDTH, tile_size, resources_folder
+from modules.config import SCREEN_HEIGHT, SCREEN_WIDTH, tile_size, resources_folder, bg_resize_koeficient
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -97,18 +97,18 @@ fonts = {
     "notification": pygame.font.Font(None, 30),
 }
 scaled_bgs = [
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/menu_bg.jpg").convert(), (1920, 1000)), # menu
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg0.jpg").convert(), (1778, 1000)), # level1
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg1.jpg").convert(), (1778, 1000)), # level2
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg2.png").convert(), (1778, 1000)), # level3
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg3.jpg").convert(), (1778, 1000)), # level4
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg4.jpg").convert(), (1778, 1000)), # level5
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg5.png").convert(), (1778, 1000)), # level6
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg6.jpg").convert(), (1778, 1000)), # level7
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg7.jpg").convert(), (1778, 1000)), # level8
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg8.png").convert(), (1778, 1000)), # level9
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg9.jpg").convert(), (1778, 1000)), # level10
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/menu_bg.jpg").convert(), (1920 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # menu
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg0.jpg").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level1
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg1.jpg").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level2
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg2.png").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level3
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg3.jpg").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level4
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg4.jpg").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level5
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg5.png").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level6
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg6.jpg").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level7
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg7.jpg").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level8
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg8.png").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level9
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/bgs/bg9.jpg").convert(), (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient)), # level10
 ]
 endscreens = [
-    pygame.transform.scale(pygame.image.load(f"{resources_folder}/endscreens/1.png").convert(), (1332, 1000))
+    pygame.transform.scale(pygame.image.load(f"{resources_folder}/endscreens/1.png").convert(), (1332 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
 ]

@@ -41,4 +41,4 @@ timer_text = Text("0:00:00", "grey_dark", "timer", (50, 15))
 
 cursor = Cursor((0, 0), (4, 36))
 
-notification = Notification(((SCREEN_WIDTH / 2) - 300, 800), (600, 150), "Yes — there are several apps that help you figure out how to recycle correctly (which bin, where to drop off, etc.). Depending on your location, some can even scan barcodes or photos of packaging to tell you where it goes. Here are a few good ones + what features they offer. If you tell me what country youre in, I can suggest ones specific to your area.")
+notification = Notification(((SCREEN_WIDTH / 2) - 300, 800), (600, 150), "{Notification message}")

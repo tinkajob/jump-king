@@ -340,6 +340,10 @@ class PlayerController:
                         self.times_bounced_midair += 1
                     return
 
+    def get_center_pos(self:object):
+        """Returns current player position"""
+        return self.rect.center
+
     def reset_values(self:object):
         """Resets all player values"""
         self.speed_y = self.speed_x = 0
