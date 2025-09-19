@@ -268,6 +268,14 @@ class Notification:
         self.color = colors["grey_dark"]
         self.has_been_pressed = False
 
+    def show_notification(self, message):
+        self.is_visible = True
+        self.text.text = message
+        self.update()
+
+    def delete_notification(self):
+        self.is_visible = False
+
     def draw(self, screen:pygame.Surface):
         """If allowed, draws notification on screen"""
         if not self.is_visible:

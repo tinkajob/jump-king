@@ -120,6 +120,7 @@ messages = {
     "greeting_back": f"Welcome back, {PLAYER_NAME}",
     "greeting_new": f"Welcome, {PLAYER_NAME}",
     "greeting_guest": f"Logged in as guest. You are using shared stats.",
-    "err_password": f"ERROR logging in!\nPassword you entered is incorrect!"
+    "err_password": f"ERROR logging in!\nPassword you entered is incorrect!",
+    "endscreen": f"Press any key to continue...",
 }
 #============================= USER INTERFACE =============================

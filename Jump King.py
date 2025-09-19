@@ -14,6 +14,7 @@ while WINDOW_OPEN:
     music.main_menu()
     screen.blit(scaled_bgs[0], (-600, 0))
     submit_button_already_clicked = False
+    notification.delete_notification()
     faded_in = False
 
     clock.tick()
@@ -35,9 +36,6 @@ while WINDOW_OPEN:
         username_input.capture_input(events, username_text, password_text)
         password_input.capture_input(events, username_text, password_text)
         cursor.update()
-
-        # notification.is_clicked()
-        # notification.update()
 
         if submit_button.is_clicked():
             if not submit_button_already_clicked:
@@ -74,6 +72,8 @@ while WINDOW_OPEN:
     play_button_already_clicked = False
     quit_button_already_clicked = False
     logout_button_already_clicked = False
+    
+    notification.delete_notification()
 
     while main_menu:
         delta_time = clock.tick(60) / 1000.0 #tisto je FPS cap
@@ -145,6 +145,7 @@ while WINDOW_OPEN:
     level = levels[current_level]
     player.reset_position(SCREEN_WIDTH / 2 - player_size / 2, 891)
     player.reset_values()
+    notification.delete_notification()
     start_time = pygame.time.get_ticks()
 
     while running:
@@ -213,6 +214,8 @@ while WINDOW_OPEN:
     faded_in = False
     pygame.mixer.music.stop()
     music.play(current_level, endscreen)
+    notification.delete_notification()
+    notification.show_notification(messages["endscreen"])
 
     while endscreen:
         delta_time = clock.tick(60) / 1000.0 # tisto je FPS cap
@@ -229,7 +232,9 @@ while WINDOW_OPEN:
                 next_scene = "quit"
         
         keys = pygame.key.get_pressed()
-        
+
+        notification.is_clicked()
+
         if next_scene == "endscreen" or ((next_scene == "main_menu" or next_scene == "quit") and effect.get_active()):
             draw_scene("endscreen", screen)
 
@@ -253,8 +258,11 @@ while WINDOW_OPEN:
             main_menu = False
             endscreen = False
 
+
         effect.update(delta_time, screen)
         pygame.display.flip()
+
+    notification.delete_notification()
 
 pygame.mixer.music.stop()
 pygame.quit()

@@ -35,7 +35,6 @@ submit_text = Text("Submit", "white", "normal", submit_button.rect.center)
 logout_text = Text("Logout", "white", "normal", logout_button.rect.center)
 username_text = Text("username", "white", "smaller", username_input.rect.center)
 password_text = Text("password", "white", "smaller", password_input.rect.center)
-endscreen_text = Text("Press any key to continue...", "black", "bold", ((SCREEN_WIDTH / 2), 840))
 FPS_text = Text("000", "grey_dark", "timer", (SCREEN_WIDTH - 60,15))
 timer_text = Text("0:00:00", "grey_dark", "timer", (50, 15))
 

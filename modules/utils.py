@@ -195,6 +195,7 @@ def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_ti
         objects.play_text.draw(screen)
         objects.quit_text.draw(screen)
         objects.logout_text.draw(screen)
+        objects.notification.draw(screen)
 
     elif scene == "running":
         screen.blit(scaled_bgs[current_level + 1], dynamic_bg_pos(objects.player.get_center_pos(), scaled_bgs[current_level + 1]))
@@ -203,10 +204,11 @@ def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_ti
         objects.main_babe.draw(screen, current_level, delta_time)
         objects.timer_text.draw(screen)
         objects.FPS_text.draw(screen)
+        objects.notification.draw(screen)
     
     elif scene == "endscreen":
         screen.blit(endscreens[0], dynamic_bg_pos(pygame.mouse.get_pos(), endscreens[0], False))
-        objects.endscreen_text.draw(screen)
+        objects.notification.draw(screen)
 
     elif scene == "login":
         screen.blit(scaled_bgs[0], dynamic_bg_pos(pygame.mouse.get_pos(), scaled_bgs[0], False, (-300, 0))) #(-600, 0)
@@ -219,7 +221,7 @@ def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_ti
         objects.username_text.draw(screen)
         objects.password_text.draw(screen)
         objects.cursor.draw(screen, delta_time)
-        #objects.notification.draw(screen)
+        objects.notification.draw(screen)
 
 def save_player_stats(PLAYER_NAME:str, stats:list):
     """Saves player stats to its corresponding file"""
@@ -301,7 +303,10 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
     """Returns tuple containing positions for images to displace background"""
     
     bg_pos = [0, 0]
-    displacement_koeficient = (bg_image.get_height() - SCREEN_HEIGHT) / SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
+    if bg_image.get_width() / SCREEN_WIDTH > bg_image.get_height() / SCREEN_HEIGHT:
+        displacement_koeficient = (bg_image.get_height() - SCREEN_HEIGHT) / SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
+    else:
+        displacement_koeficient = (bg_image.get_width() - SCREEN_WIDTH) / SCREEN_WIDTH
 
     bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) + (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + offset[0]
     bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) + (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + offset[1]
