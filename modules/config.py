@@ -1,5 +1,6 @@
 #============================= OTHER =============================
 SCREEN_WIDTH, SCREEN_HEIGHT = 1320, 1000
+CAMPAIGN = "main"
 running, main_menu, endscreen, login, waiting_for_release, WINDOW_OPEN = False, False, False, True, True, True
 current_level, current_frame, time_spent = 0, 0, 0
 start_time, hours, minutes, seconds = 0, 0, 0, 0
@@ -75,6 +76,8 @@ musics = {
     "legend":       f"{resources_folder}/music/a_legend_lives_on.mp3",
     "zacasno":      f"{resources_folder}/music/bg_music.mp3",
 }
+music_level_instructions = []
+music_menus_instructions = {}
 can_play_music = True
 play_button_already_clicked, quit_button_already_clicked, submit_button_already_clicked, logout_button_already_clicked = False, False, False, False
 #============================= SOUND =============================
@@ -83,6 +86,7 @@ play_button_already_clicked, quit_button_already_clicked, submit_button_already_
 faded_in = False
 game_ended = False
 bg_resize_koeficient = 1.05
+current_menu = "login"
 next_scene = "login"
 title_text = "Welcome!"
 sizes = {
@@ -121,6 +125,8 @@ messages = {
     "greeting_new": f"Welcome, {PLAYER_NAME}",
     "greeting_guest": f"Logged in as guest. You are using shared stats.",
     "err_password": f"ERROR logging in!\nPassword you entered is incorrect!",
+    "err_loading_music_config": f"Failed to load config file for music!",
+    "loaded_music_config": f"Music config loaded successfully!",
     "endscreen": f"Press any key to continue...",
 }
 #============================= USER INTERFACE =============================

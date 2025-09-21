@@ -1,0 +1,30 @@
+{
+    "main": {
+        "menus": {
+            "login": "main_menu",
+            "main": "main_menu",
+            "endscreen": "sunrise"
+
+        },
+        "levels": [
+            "",
+            "",
+            "coronation",
+            "sewer"
+        ]
+    },
+    "test": {
+        "menus": {
+            "login": "main_menu",
+            "main": "main_menu",
+            "endscreen": "sunrise"
+
+        },
+        "levels": [
+            "",
+            "",
+            "",
+            ""
+        ]
+    }
+}

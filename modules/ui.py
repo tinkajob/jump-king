@@ -1,4 +1,4 @@
-import pygame, math, textwrap
+import pygame, math
 from modules.config import colors
 from modules.pygame_objects import fonts, buttons
 

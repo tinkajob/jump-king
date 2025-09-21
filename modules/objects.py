@@ -1,7 +1,7 @@
-from modules.config import level_paths, SCREEN_HEIGHT, SCREEN_WIDTH, player_size, current_level, coordinates, sizes, title_text, levels_folder
+from modules.config import level_paths, SCREEN_HEIGHT, SCREEN_WIDTH, player_size, current_level, coordinates, sizes, title_text, levels_folder, CAMPAIGN
 from modules.player_controller import PlayerController
 from modules.npcs import BabeController
-from modules.utils import create_level, load_level_from_file, create_level_surface, detect_levels
+from modules.utils import create_level, load_level_from_file, create_level_surface, detect_levels, load_music_config
 from modules.music_controller import MusicController
 from modules.ui import Text, Button, InputField, FadeManager, Cursor, Notification
 
@@ -41,3 +41,5 @@ timer_text = Text("0:00:00", "grey_dark", "timer", (50, 15))
 cursor = Cursor((0, 0), (4, 36))
 
 notification = Notification(((SCREEN_WIDTH / 2) - 300, 800), (600, 150), "{Notification message}")
+
+music_level_instructions, music_menus_instructions = load_music_config(CAMPAIGN)

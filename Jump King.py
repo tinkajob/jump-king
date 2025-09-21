@@ -11,7 +11,8 @@ pygame.display.set_caption("Jump King")
 pygame.display.set_icon(pygame.image.load(f"{resources_folder}/other/icon.png"))
 
 while WINDOW_OPEN:
-    music.main_menu()
+    current_menu = "login"
+    music.play_menu(current_menu)
     screen.blit(scaled_bgs[0], (-600, 0))
     submit_button_already_clicked = False
     notification.delete_notification()
@@ -31,7 +32,7 @@ while WINDOW_OPEN:
             if event.type == pygame.QUIT:
                 effect.start_fade_out()
                 next_scene = "quit"
-                music.play(current_level, endscreen, "fadeout")
+                music.play_fadeout()
         
         username_input.capture_input(events, username_text, password_text)
         password_input.capture_input(events, username_text, password_text)
@@ -48,7 +49,7 @@ while WINDOW_OPEN:
             if not quit_button_already_clicked:
                 sfx["click"].play()
             effect.start_fade_out()
-            music.play(current_level, endscreen, "fadeout")
+            music.play_fadeout()
             next_scene = "quit"
             quit_button_already_clicked = True
 
@@ -74,6 +75,8 @@ while WINDOW_OPEN:
     logout_button_already_clicked = False
     
     notification.delete_notification()
+    current_menu = "main"
+    music.play_menu(current_menu) #loh da bos mogu dat to v komentar
 
     while main_menu:
         delta_time = clock.tick(60) / 1000.0 #tisto je FPS cap
@@ -86,13 +89,13 @@ while WINDOW_OPEN:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 effect.start_fade_out()
-                music.play("fadeout")
+                music.play_fadeout()
                 next_scene = "quit"
 
         if play_button.is_clicked():
             if not play_button_already_clicked:
                 sfx["click"].play()
-            music.play(current_level, endscreen, "fadeout")
+            music.play_fadeout()
             effect.start_fade_out()
             next_scene = "running"
             play_button_already_clicked = True
@@ -101,7 +104,7 @@ while WINDOW_OPEN:
         if quit_button.is_clicked():
             if not quit_button_already_clicked:
                 sfx["click"].play()
-            music.play(current_level, endscreen, "fadeout")
+            music.play_fadeout()
             effect.start_fade_out()
             next_scene = "quit"
             quit_button_already_clicked = True
@@ -111,7 +114,7 @@ while WINDOW_OPEN:
                 sfx["click"].play()
             next_scene = "login"
             effect.start_fade_out()
-            music.play(current_level, endscreen, "fadeout")
+            music.play_fadeout()
             logout_button_already_clicked = True
             username_input.input_text = ""
             password_input.input_text = ""
@@ -138,15 +141,17 @@ while WINDOW_OPEN:
         pygame.display.flip()
 
     pygame.mixer.music.stop()
-    music.play(current_level, endscreen)
+    current_level = 0
+    music.play_level(current_level)
     faded_in = False
     game_ended = False
-    current_level = 0
     level = levels[current_level]
     player.reset_position(SCREEN_WIDTH / 2 - player_size / 2, 891)
     player.reset_values()
     notification.delete_notification()
     start_time = pygame.time.get_ticks()
+    current_menu = ""
+    can_play_music = True
 
     while running:
         if not faded_in:
@@ -175,13 +180,12 @@ while WINDOW_OPEN:
             if event.type == pygame.QUIT:
                 stats["ragequits"] += 1
                 save_player_stats(PLAYER_NAME, stats)
-                music.play(current_level, endscreen, "fadeout")
+                music.play_fadeout()
                 effect.start_fade_out()
                 next_scene = "quit"
 
         if main_babe.check_for_ending(player) and not game_ended:
             next_scene = "endscreen"
-            music.play(current_level, endscreen, "fadeout")
             effect.start_fade_out()
             stats["games_played"] += 1
             player.can_move = False
@@ -189,9 +193,11 @@ while WINDOW_OPEN:
             player.rect.x = main_babe.rect.x - 80
             player.current_frame = 0
             player.direction = "right"
+            music.play_fadeout()
+            can_play_music = False
 
         if can_play_music:
-            music.play(current_level, endscreen)
+            music.play_level(current_level)
             
         if next_scene == "endscreen" and not effect.get_active():
             can_play_music = False
@@ -213,9 +219,11 @@ while WINDOW_OPEN:
 
     faded_in = False
     pygame.mixer.music.stop()
-    music.play(current_level, endscreen)
     notification.delete_notification()
     notification.show_notification(messages["endscreen"])
+
+    current_menu = "endscreen"
+    music.play_menu(current_menu)
 
     while endscreen:
         delta_time = clock.tick(60) / 1000.0 # tisto je FPS cap
@@ -228,7 +236,7 @@ while WINDOW_OPEN:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 effect.start_fade_out()
-                music.play(current_level, endscreen, "fadeout")
+                music.play_fadeout()
                 next_scene = "quit"
         
         keys = pygame.key.get_pressed()
@@ -242,7 +250,7 @@ while WINDOW_OPEN:
             if not any(keys):
                 waiting_for_release = False
         elif any(keys):
-            music.play(current_level, endscreen, "fadeout")
+            music.play_fadeout()
             effect.start_fade_out()
             next_scene = "main_menu"
             
@@ -257,7 +265,6 @@ while WINDOW_OPEN:
             WINDOW_OPEN = False
             main_menu = False
             endscreen = False
-
 
         effect.update(delta_time, screen)
         pygame.display.flip()

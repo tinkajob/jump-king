@@ -1,6 +1,6 @@
 import os, json, hashlib, pygame
 
-from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH
+from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, resources_folder, messages
 from modules.platform import Platform
 import modules.objects as objects
 from modules.pygame_objects import endscreens, scaled_bgs, tile_images
@@ -325,3 +325,17 @@ def create_level_surface(level):
         level_surface.blit(tile_images[platform.type], (platform.rect.x, platform.rect.y))
 
     return level_surface
+
+def load_music_config(campaign:str = "main"):
+    filepath = f"{resources_folder}/music_config.json"
+
+    if os.path.exists(filepath):
+        with open(filepath, "r") as file:
+            data = json.load(file)
+            levels_config = data[campaign]["levels"]
+            menus_config = data[campaign]["menus"]
+            objects.notification.show_notification(messages["loaded_music_config"])
+    else:
+        objects.notification.show_notification(messages["err_loading_music_config"])
+
+    return levels_config, menus_config
