@@ -14,7 +14,10 @@ class MusicController:
     def play_level(self:object, current_level:int):
         """Plays the correct song based on the input"""     
 
-        self.requested_song = objects.music_level_instructions[current_level]
+        if objects.music_level_instructions:
+            self.requested_song = objects.music_level_instructions[current_level]
+        else:
+            self.requested_song == ""
 
         if self.requested_song == "":
             self.play_fadeout()

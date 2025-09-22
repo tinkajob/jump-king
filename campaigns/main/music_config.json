@@ -1,0 +1,14 @@
+{
+    "menus": {
+        "login": "main_menu",
+        "main": "main_menu",
+        "endscreen": "sunrise"
+
+    },
+    "levels": [
+        "",
+        "",
+        "sewer",
+        "sewer"
+    ]
+}

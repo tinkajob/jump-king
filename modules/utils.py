@@ -1,6 +1,6 @@
 import os, json, hashlib, pygame
 
-from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, resources_folder, messages
+from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, campaigns_folder, messages
 from modules.platform import Platform
 import modules.objects as objects
 from modules.pygame_objects import endscreens, scaled_bgs, tile_images
@@ -290,17 +290,45 @@ def update_player_stats(stats:list):
     if stats["highest_distance_descended_in_game"] < game_stats["distance_descended"]:
         stats["highest_distance_descended_in_game"] = game_stats["distance_descended"]
 
-def detect_levels(levels_folder:str, level_paths:list):
+def detect_levels(campaign:str, levels_folder:str, level_paths:list):
     """Goes trough all files in given folder and adds them to list of levels *(ordered alphabetically)*"""
-    for root, _, files in os.walk(f"{levels_folder}"): # root in _ sta ztu kr os.walk vrne tuple 3 stvari, ampak mi rabmo samo seznam filesov
-        for file in files:
-            if file.endswith(".txt"):
-                level_paths.append(f"{levels_folder}/{file}")
+    if campaign != "":
+        filepath = f"{levels_folder}/{campaign}"
+    else:
+        filepath = f"{levels_folder}"
+
+    root, dirs, files = list_current_folder(filepath)
+    
+    if not files: #tu je za zdej, dokler ne nardim dropdown al neki za zbirat campaign!!
+        print(messages["err_empty_campaign"])
+        filepath = f"{levels_folder}"
+        root, dirs, files = list_current_folder(filepath)
+
+    for file in files:
+        if file.endswith(".txt"):
+            level_paths.append(f"{filepath}/{file}")
     level_paths.sort()
     return level_paths
 
+def list_current_folder(path:str):
+    """Walks the current folder and outputs all items in that folder"""
+
+    if not os.path.exists(path):
+        return "", [], []
+
+    dirs = []
+    files = []
+
+    with os.scandir(path) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                dirs.append(entry.name)
+            elif entry.is_file():
+                files.append(entry.name)
+    return path, dirs, files
+
 def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite_dir:bool = True, offset:tuple [int, int] = (0, 0)):
-    """Returns tuple containing positions for images to displace background"""
+    """Returns tuple containing positions for images to offset background"""
     
     bg_pos = [0, 0]
     if bg_image.get_width() / SCREEN_WIDTH > bg_image.get_height() / SCREEN_HEIGHT:
@@ -326,16 +354,22 @@ def create_level_surface(level):
 
     return level_surface
 
-def load_music_config(campaign:str = "main"):
-    filepath = f"{resources_folder}/music_config.json"
+def load_music_config(campaign:str = ""):
+    """Loads music instructions based on music_config.json"""
+    if campaign != "":
+        filepath = f"{campaigns_folder}/{campaign}/music_config.json"
+    else:
+        filepath = f"{campaigns_folder}/music_config.json"
 
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
             data = json.load(file)
-            levels_config = data[campaign]["levels"]
-            menus_config = data[campaign]["menus"]
+            levels_config = data.get("levels", [])
+            menus_config  = data.get("menus", {"login": "", "main": "", "endscreen": ""})
+
             objects.notification.show_notification(messages["loaded_music_config"])
     else:
         objects.notification.show_notification(messages["err_loading_music_config"])
+        return [], {"login": "", "main": "", "endscreen": ""}
 
     return levels_config, menus_config

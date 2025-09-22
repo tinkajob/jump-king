@@ -5,7 +5,7 @@ running, main_menu, endscreen, login, waiting_for_release, WINDOW_OPEN = False, 
 current_level, current_frame, time_spent = 0, 0, 0
 start_time, hours, minutes, seconds = 0, 0, 0, 0
 tile_size = 40
-stats_folder, levels_folder, resources_folder = "stats", "levels", "resources"
+stats_folder, campaigns_folder, resources_folder = "stats", "campaigns", "resources"
 level_paths = []
 game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "jumps": 0,
@@ -126,6 +126,7 @@ messages = {
     "greeting_guest": f"Logged in as guest. You are using shared stats.",
     "err_password": f"ERROR logging in!\nPassword you entered is incorrect!",
     "err_loading_music_config": f"Failed to load config file for music!",
+    "err_empty_campaign": f"This campaign has no levels!", 
     "loaded_music_config": f"Music config loaded successfully!",
     "endscreen": f"Press any key to continue...",
 }
