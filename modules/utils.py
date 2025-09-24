@@ -252,6 +252,7 @@ def load_player_stats(PLAYER_NAME:str, stats:list):
         for stat in stats:
             stats[stat] = 0
     
+    #ce trenutno v stats.json ni neke vrednosti (smo na novo uvedli/ponesreci zbrisana), jo nastavimo na fallback vrednost
     for key, value in def_stats.items():
         if key not in stats:
             stats[key] = value

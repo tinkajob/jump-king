@@ -9,6 +9,10 @@ pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Jump King")
 pygame.display.set_icon(pygame.image.load(f"{resources_folder}/other/icon.png"))
+VOLUME_MASTER = def_stats["volume_master"]
+VOLUME_SFX = def_stats["volume_sfx"]
+VOLUME_MUSIC = def_stats["volume_music"]
+music.set_volume(sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
 
 while WINDOW_OPEN:
     current_menu = "login"
@@ -68,6 +72,7 @@ while WINDOW_OPEN:
 
     if not loaded_player_stats:
         load_player_stats(PLAYER_NAME, stats)
+        music.update_volume(stats)
 
     faded_in = False
     play_button_already_clicked = False
@@ -88,6 +93,7 @@ while WINDOW_OPEN:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                save_player_stats(PLAYER_NAME, stats)
                 effect.start_fade_out()
                 music.play_fadeout()
                 next_scene = "quit"

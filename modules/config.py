@@ -22,6 +22,9 @@ game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
 stats = {}
 def_stats = { #all time (per-user stats, primer: total jumps, min_jumps_in_game)
     "password": 0,                              #DONE
+    "volume_master": 0.5,
+    "volume_sfx": 0.1,
+    "volume_music": 0.1,
     "total_playtime": 0,
     "personal_best_time": 0,
     "avg_completion_time": 0,
@@ -64,6 +67,9 @@ PLAYER_NAME = ""
 #============================= PLAYER & ENTITIES =============================
 
 #============================= SOUND =============================
+VOLUME_MASTER = 0.5 #s tem volumom zacnemo!
+VOLUME_SFX = 0.1
+VOLUME_MUSIC = 0.1
 musics = {
     "main_menu":    f"{resources_folder}/music/main_menu.mp3",
     "sewer":        f"{resources_folder}/music/sewer.mp3",
