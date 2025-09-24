@@ -258,7 +258,6 @@ while WINDOW_OPEN:
             main_menu = False
             endscreen = False
 
-
         effect.update(delta_time, screen)
         pygame.display.flip()
 
