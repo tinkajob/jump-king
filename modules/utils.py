@@ -418,7 +418,6 @@ def load_sfx(path:str, fallback_path):
     
     return sfx
 
-
 def load_resources(CAMPAIGN):
     from modules.config import fallback_resources_folder, tile_images_paths, player_images_paths, babe_images_paths, button_images_paths, button_load_sizes, bgs_images_paths, bg_resize_koeficient, endscreens_images_paths, sfx_keys, fonts_keys, fonts_sizes, fonts_names
 
