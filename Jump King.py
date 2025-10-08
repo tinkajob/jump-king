@@ -3,12 +3,12 @@ import pygame, sys, math
 from modules.config import *
 from modules.objects import *
 from modules.pygame_objects import *
-from modules.utils import log_in, draw_scene, load_player_stats, save_player_stats
+from modules.utils import log_in, draw_scene, load_player_stats, save_player_stats, load_resources
 
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Jump King")
-pygame.display.set_icon(pygame.image.load(f"{resources_folder}/other/icon.png"))
+pygame.display.set_icon(pygame.image.load(f"{fallback_resources_folder}/other/icon.png"))
 VOLUME_MASTER = def_stats["volume_master"]
 VOLUME_SFX = def_stats["volume_sfx"]
 VOLUME_MUSIC = def_stats["volume_music"]
@@ -57,7 +57,7 @@ while WINDOW_OPEN:
             next_scene = "quit"
             quit_button_already_clicked = True
 
-        draw_scene("login", screen, 0, delta_time)
+        draw_scene("login", screen, scaled_bgs, endscreens, 0, delta_time)
         effect.update(delta_time, screen)
 
         if next_scene == "main_menu" and not effect.get_active():
@@ -130,7 +130,7 @@ while WINDOW_OPEN:
             username_text.update()
             password_text.update()
 
-        draw_scene("main_menu", screen)
+        draw_scene("main_menu", screen, scaled_bgs, endscreens)
         effect.update(delta_time, screen)
 
         if next_scene == "running" and not effect.get_active():
@@ -158,6 +158,9 @@ while WINDOW_OPEN:
     start_time = pygame.time.get_ticks()
     current_menu = ""
     can_play_music = True
+
+    load_resources(CAMPAIGN) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
+    clock.tick()
 
     while running:
         if not faded_in:
@@ -218,7 +221,7 @@ while WINDOW_OPEN:
             game_ended = True
 
         if not game_ended:
-            draw_scene("running", screen, current_level, delta_time)
+            draw_scene("running", screen, scaled_bgs, endscreens, current_level, delta_time)
 
         effect.update(delta_time, screen)
         pygame.display.flip()
@@ -250,7 +253,7 @@ while WINDOW_OPEN:
         notification.is_clicked()
 
         if next_scene == "endscreen" or ((next_scene == "main_menu" or next_scene == "quit") and effect.get_active()):
-            draw_scene("endscreen", screen)
+            draw_scene("endscreen", screen, scaled_bgs, endscreens)
 
         if waiting_for_release:
             if not any(keys):

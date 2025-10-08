@@ -1,9 +1,9 @@
 import os, json, hashlib, pygame
 
-from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, campaigns_folder, messages
+from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, campaigns_folder, messages, bg_resize_koeficient
 from modules.platform import Platform
 import modules.objects as objects
-from modules.pygame_objects import endscreens, scaled_bgs, tile_images
+#from modules.pygame_objects import endscreens, scaled_bgs, tile_images
 
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, username_text:str, password_text:str, stats:list):
     """Handles user login and account creation based on provided inputs."""
@@ -183,7 +183,7 @@ def autotile(neighbors:list):
         return 46
     return 0 #prepisi da bo ku binary tree?
 
-def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_time:float = 0):
+def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, endscreens:list, current_level:int = 0, delta_time:float = 0):
     """Handles drawing scenes"""
 
     if scene == "main_menu":
@@ -291,18 +291,18 @@ def update_player_stats(stats:list):
     if stats["highest_distance_descended_in_game"] < game_stats["distance_descended"]:
         stats["highest_distance_descended_in_game"] = game_stats["distance_descended"]
 
-def detect_levels(campaign:str, levels_folder:str, level_paths:list):
+def detect_levels(campaign:str, campaigns_folder:str, level_paths:list):
     """Goes trough all files in given folder and adds them to list of levels *(ordered alphabetically)*"""
     if campaign != "":
-        filepath = f"{levels_folder}/{campaign}"
+        filepath = f"{campaigns_folder}/{campaign}/levels"
     else:
-        filepath = f"{levels_folder}"
+        filepath = f"{campaigns_folder}"
 
     root, dirs, files = list_current_folder(filepath)
     
     if not files: #tu je za zdej, dokler ne nardim dropdown al neki za zbirat campaign!!
         print(messages["err_empty_campaign"])
-        filepath = f"{levels_folder}"
+        filepath = f"{campaigns_folder}"
         root, dirs, files = list_current_folder(filepath)
 
     for file in files:
@@ -346,7 +346,7 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
 
     return (bg_pos[0], bg_pos[1])
 
-def create_level_surface(level):
+def create_level_surface(level:object, tile_images:list):
     """Creates level surface by combining all platforms/tiles into one surface"""
     level_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 
@@ -374,3 +374,94 @@ def load_music_config(campaign:str = ""):
         return [], {"login": "", "main": "", "endscreen": ""}
 
     return levels_config, menus_config
+
+def load_image(path:str, fallback_path:str,scale:bool, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
+    from modules.config import SUPPORTED_IMAGE_FORMATS
+    
+    found_image = False
+
+    for format in SUPPORTED_IMAGE_FORMATS:
+        if os.path.exists(f"{path}{format}"):
+            image = pygame.transform.flip(pygame.image.load(f"{path}{format}"), flip_x, flip_y)
+            found_image = True
+    
+    if not found_image:
+        for format in SUPPORTED_IMAGE_FORMATS:
+            if os.path.exists(f"{fallback_path}{format}"):
+                image = pygame.transform.flip(pygame.image.load(f"{fallback_path}{format}"), flip_x, flip_y)
+        
+    if scale:
+        image = pygame.transform.scale(image, size)
+
+    if preserve_alpha:
+        return image.convert_alpha()
+    else:
+        return image.convert()
+
+def load_font(path:str, fallback_path:str, size:int):
+    if os.path.exists(path):
+        font = pygame.font.Font(path, size)
+    
+    elif os.path.exists(fallback_path):
+        font = pygame.font.Font(fallback_path, size)
+
+    else:
+        font = pygame.font.Font(None, size)
+    
+    return font
+
+def load_sfx(path:str, fallback_path):
+    if os.path.exists(path):
+        sfx = pygame.mixer.Sound(path)
+    else:
+        sfx = pygame.mixer.Sound(fallback_path)
+    
+    return sfx
+
+
+def load_resources(CAMPAIGN):
+    from modules.config import fallback_resources_folder, tile_images_paths, player_images_paths, babe_images_paths, button_images_paths, button_load_sizes, bgs_images_paths, bg_resize_koeficient, endscreens_images_paths, sfx_keys, fonts_keys, fonts_sizes, fonts_names
+
+    resources_folder = f"campaigns/{CAMPAIGN}/resources"
+
+    # zloadamo s campaign resources
+    tile_images = []
+    for i in range(len(tile_images_paths)):
+        tile_images.append(None)
+        tile_images[i] = load_image(resources_folder + tile_images_paths[i],fallback_resources_folder + tile_images_paths[i], True, (tile_size, tile_size), True)
+
+    player_images = []
+    for i in range(len(player_images_paths)):
+        player_images.append(None)
+        player_images[i] = load_image(resources_folder + player_images_paths[i], fallback_resources_folder + player_images_paths[i], True, (80, 80), True)
+
+    babe_images = []
+    for i in range(len(babe_images_paths)):
+        babe_images.append(None)
+        babe_images[i] = load_image(resources_folder + babe_images_paths[i], fallback_resources_folder + babe_images_paths[i], True, (80, 80), True)
+
+    buttons = []
+    for i in range(len(button_images_paths)):
+        buttons.append(None)
+        buttons[i] = load_image(resources_folder + button_images_paths[i], fallback_resources_folder + button_images_paths[i], True, button_load_sizes[i], True)
+
+    scaled_bgs = []
+    for i in range(len(bgs_images_paths)):
+        scaled_bgs.append(None)
+        scaled_bgs[i] = load_image(resources_folder + bgs_images_paths[i], fallback_resources_folder + bgs_images_paths[i], True, (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
+
+    endscreens = []
+    for i in range(len(endscreens_images_paths)):
+        endscreens.append(None)
+        endscreens[i] = load_image(resources_folder + endscreens_images_paths[i], fallback_resources_folder + endscreens_images_paths[i], True, (1332 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
+
+    sfx = {}
+    for i in range(len(sfx_keys)):
+        sfx[sfx_keys[i]] = load_sfx(f"{resources_folder}/sfx/{sfx_keys[i]}.wav", f"{fallback_resources_folder}/sfx/{sfx_keys[i]}.wav")
+
+    fonts = {}
+    for i in range(len(fonts_keys)):
+        fonts[fonts_keys[i]] = load_font(f"{resources_folder}/other/{fonts_names[i]}.otf", f"{fallback_resources_folder}/other/{fonts_names[i]}.otf", fonts_sizes[i])
+
+    return tile_images, player_images, babe_images, buttons, scaled_bgs, endscreens, sfx, fonts
+        

@@ -5,7 +5,7 @@ running, main_menu, endscreen, login, waiting_for_release, WINDOW_OPEN = False, 
 current_level, current_frame, time_spent = 0, 0, 0
 start_time, hours, minutes, seconds = 0, 0, 0, 0
 tile_size = 40
-stats_folder, campaigns_folder, resources_folder = "stats", "campaigns", "resources"
+stats_folder, campaigns_folder, fallback_resources_folder = "stats", "campaigns", "resources"
 level_paths = []
 game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "jumps": 0,
@@ -71,21 +71,28 @@ VOLUME_MASTER = 0.5 #s tem volumom zacnemo!
 VOLUME_SFX = 0.1
 VOLUME_MUSIC = 0.1
 musics = {
-    "main_menu":    f"{resources_folder}/music/main_menu.mp3",
-    "sewer":        f"{resources_folder}/music/sewer.mp3",
-    "fallen_king":  f"{resources_folder}/music/fallen_king.mp3",
-    "despair":      f"{resources_folder}/music/despair.mp3",
-    "masse":        f"{resources_folder}/music/masse.mp3",
-    "sky_blue":     f"{resources_folder}/music/sky_blue.mp3",
-    "coronation":   f"{resources_folder}/music/coronation.mp3",
-    "sunrise":      f"{resources_folder}/music/sunrise.mp3",
-    "legend":       f"{resources_folder}/music/a_legend_lives_on.mp3",
-    "zacasno":      f"{resources_folder}/music/bg_music.mp3",
+    "main_menu":    f"{fallback_resources_folder}/music/main_menu.mp3",
+    "sewer":        f"{fallback_resources_folder}/music/sewer.mp3",
+    "fallen_king":  f"{fallback_resources_folder}/music/fallen_king.mp3",
+    "despair":      f"{fallback_resources_folder}/music/despair.mp3",
+    "masse":        f"{fallback_resources_folder}/music/masse.mp3",
+    "sky_blue":     f"{fallback_resources_folder}/music/sky_blue.mp3",
+    "coronation":   f"{fallback_resources_folder}/music/coronation.mp3",
+    "sunrise":      f"{fallback_resources_folder}/music/sunrise.mp3",
+    "legend":       f"{fallback_resources_folder}/music/a_legend_lives_on.mp3",
+    "zacasno":      f"{fallback_resources_folder}/music/bg_music.mp3",
 }
 music_level_instructions = []
 music_menus_instructions = {}
 can_play_music = True
 play_button_already_clicked, quit_button_already_clicked, submit_button_already_clicked, logout_button_already_clicked = False, False, False, False
+sfx_keys = [
+    "click",
+    "jump",
+    "bounce",
+    "landing",
+    "fall",
+]
 #============================= SOUND =============================
 
 #============================= USER INTERFACE =============================
@@ -136,4 +143,122 @@ messages = {
     "loaded_music_config": f"Music config loaded successfully!",
     "endscreen": f"Press any key to continue...",
 }
+tile_images_paths = [
+    "/tiles/tile_1",
+    "/tiles/tile_2",
+    "/tiles/tile_3",
+    "/tiles/tile_4",
+    "/tiles/tile_5",
+    "/tiles/tile_6",
+    "/tiles/tile_7",
+    "/tiles/tile_8",
+    "/tiles/tile_9",
+    "/tiles/tile_10",
+    "/tiles/tile_11",
+    "/tiles/tile_12",
+    "/tiles/tile_13",
+    "/tiles/tile_14",
+    "/tiles/tile_15",
+    "/tiles/tile_16",
+    "/tiles/tile_17",
+    "/tiles/tile_18",
+    "/tiles/tile_19",
+    "/tiles/tile_20",
+    "/tiles/tile_21",
+    "/tiles/tile_22",
+    "/tiles/tile_23",
+    "/tiles/tile_24",
+    "/tiles/tile_25",
+    "/tiles/tile_26",
+    "/tiles/tile_27",
+    "/tiles/tile_28",
+    "/tiles/tile_29",
+    "/tiles/tile_30",
+    "/tiles/tile_31",
+    "/tiles/tile_32",
+    "/tiles/tile_33",
+    "/tiles/tile_34",
+    "/tiles/tile_35",
+    "/tiles/tile_36",
+    "/tiles/tile_37",
+    "/tiles/tile_38",
+    "/tiles/tile_39",
+    "/tiles/tile_40",
+    "/tiles/tile_41",
+    "/tiles/tile_42",
+    "/tiles/tile_43",
+    "/tiles/tile_44",
+    "/tiles/tile_45",
+    "/tiles/tile_46",
+    "/tiles/tile_47",
+]
+player_images_paths = [
+    "/player_animation/player_standing",
+    "/player_animation/player_running1",
+    "/player_animation/player_running2",
+    "/player_animation/player_running3",
+    "/player_animation/player_running2",
+    "/player_animation/player_charging",
+    "/player_animation/player_jumping1",
+    "/player_animation/player_jumping2",
+    "/player_animation/player_falling",
+    "/player_animation/player_lying",
+]
+babe_images_paths = [
+    "/babe_animation/1",
+    "/babe_animation/2",
+    "/babe_animation/3",
+]
+button_images_paths = [
+    "/other/button",
+    "/other/button_highlited",
+    "/other/button_pressed",
+    "/other/button",
+    "/other/button_highlited",
+    "/other/button_pressed",
+]
+button_load_sizes = [
+    sizes["play_button"],
+    sizes["play_button"],
+    sizes["play_button"],
+    sizes["quit_button"],
+    sizes["quit_button"],
+    sizes["quit_button"],
+]
+bgs_images_paths = [
+    "/bgs/menu_bg",
+    "/bgs/bg0",
+    "/bgs/bg1",
+    "/bgs/bg2",
+    "/bgs/bg3",
+    "/bgs/bg4",
+    "/bgs/bg5",
+    "/bgs/bg6",
+    "/bgs/bg7",
+    "/bgs/bg8",
+    "/bgs/bg9",
+]
+endscreens_images_paths = [
+    "/endscreens/1"
+]
+fonts_names = [
+    "font",
+    "font",
+    "font",
+    "",
+    "",
+    "",
+]
+fonts_sizes = [36, 30, 70, 36, 50, 30]
+fonts_keys = [
+    "normal",
+    "smaller",
+    "title",
+    "timer",
+    "bold",
+    "notification",
+]
+SUPPORTED_IMAGE_FORMATS = [
+    ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tga", ".webp", ".tif", ".tiff"
+]
 #============================= USER INTERFACE =============================
