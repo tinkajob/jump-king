@@ -47,6 +47,10 @@ while WINDOW_OPEN:
         if submit_button.is_clicked():
             if not submit_button_already_clicked:
                 sfx["click"].play()
+            
+            # We only want transition if music is different for login and main menu
+            if music_menus_instructions["login"] != music_menus_instructions["main"]:
+                music.play_fadeout()
             submit_button_already_clicked = True
             PLAYER_NAME = username_input.input_text
             next_scene = log_in(username_input.input_text, password_input.input_text, title, effect, username_input, password_input, username_text, password_text, stats)
@@ -63,6 +67,7 @@ while WINDOW_OPEN:
         effect.update(delta_time, screen)
 
         if next_scene == "main_menu" and not effect.get_active():
+            
             main_menu = True
             login = False
 
@@ -83,6 +88,7 @@ while WINDOW_OPEN:
     
     notification.delete_notification()
     current_menu = "main"
+    music.play_menu(current_menu)
 
     while main_menu:
         delta_time = clock.tick(60) / 1000.0 #tisto je FPS cap
@@ -120,6 +126,10 @@ while WINDOW_OPEN:
         if logout_button.is_clicked():
             if not logout_button_already_clicked:
                 sfx["click"].play()
+
+            # We only want transition if music is different for login and main menu
+            if music_menus_instructions["login"] != music_menus_instructions["main"]:
+                music.play_fadeout()
             next_scene = "login"
             effect.start_fade_out()
             logout_button_already_clicked = True
