@@ -58,7 +58,7 @@ class MusicController:
 
         self.requested_song = objects.music_menus_instructions[current_menu]
 
-        if not self.current_song == self.requested_song:
+        if self.current_song != self.requested_song:
             pygame.mixer.music.load(musics[self.requested_song])
             pygame.mixer.music.play(-1)
             self.current_song = self.requested_song

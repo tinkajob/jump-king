@@ -17,6 +17,7 @@ music.set_volume(sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
 while WINDOW_OPEN:
     current_menu = "login"
     music.play_menu(current_menu)
+    
     screen.blit(scaled_bgs[0], (-600, 0))
     submit_button_already_clicked = False
     notification.delete_notification()
@@ -32,6 +33,7 @@ while WINDOW_OPEN:
         time_spent += delta_time
         events = pygame.event.get()
 
+        # If we close the window
         for event in events:
             if event.type == pygame.QUIT:
                 effect.start_fade_out()
@@ -81,7 +83,6 @@ while WINDOW_OPEN:
     
     notification.delete_notification()
     current_menu = "main"
-    music.play_menu(current_menu) #loh da bos mogu dat to v komentar
 
     while main_menu:
         delta_time = clock.tick(60) / 1000.0 #tisto je FPS cap
@@ -91,6 +92,7 @@ while WINDOW_OPEN:
             effect.start_fade_in()
             faded_in = True
 
+        # If we close the window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 save_player_stats(PLAYER_NAME, stats)
@@ -120,7 +122,6 @@ while WINDOW_OPEN:
                 sfx["click"].play()
             next_scene = "login"
             effect.start_fade_out()
-            music.play_fadeout()
             logout_button_already_clicked = True
             username_input.input_text = ""
             password_input.input_text = ""
@@ -145,18 +146,22 @@ while WINDOW_OPEN:
             save_player_stats(PLAYER_NAME, stats)
 
         pygame.display.flip()
-
-    pygame.mixer.music.stop()
+    
+    if next_scene != "login":
+        pygame.mixer.music.stop()
+        music.play_level(current_level)
+    
     current_level = 0
-    music.play_level(current_level)
+    level = levels[current_level]
     faded_in = False
     game_ended = False
-    level = levels[current_level]
+    
     player.reset_position(SCREEN_WIDTH / 2 - player_size / 2, 891)
     player.reset_values()
+    
     notification.delete_notification()
     start_time = pygame.time.get_ticks()
-    current_menu = ""
+    #current_menu = ""
     can_play_music = True
 
     load_resources(CAMPAIGN) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
@@ -227,12 +232,15 @@ while WINDOW_OPEN:
         pygame.display.flip()
 
     faded_in = False
-    pygame.mixer.music.stop()
+
+    # To ensure music keeps playing uninterrupted between login and main menu
+    if next_scene != "login":
+        pygame.mixer.music.stop()
+        current_menu = "endscreen"
+    music.play_menu(current_menu)
+
     notification.delete_notification()
     notification.show_notification(messages["endscreen"])
-
-    current_menu = "endscreen"
-    music.play_menu(current_menu)
 
     while endscreen:
         delta_time = clock.tick(60) / 1000.0 # tisto je FPS cap
@@ -277,8 +285,6 @@ while WINDOW_OPEN:
 
         effect.update(delta_time, screen)
         pygame.display.flip()
-
-    notification.delete_notification()
 
 pygame.mixer.music.stop()
 pygame.quit()

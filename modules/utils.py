@@ -9,7 +9,7 @@ def log_in(username:str, password:str, title:str, effect:object, username_input:
     """Handles user login and account creation based on provided inputs."""
 
     load_player_stats(username, stats)
-    if username != "" and username.lower() != "guest": #ce je player
+    if username != "" and username.lower() != "guest":
         if stats.get("password", 0) == 0:
             stats["password"] = hash_password(password)
             title.text = f"Welcome, {username}!"
@@ -17,6 +17,7 @@ def log_in(username:str, password:str, title:str, effect:object, username_input:
             effect.start_fade_out()
             return "main_menu"
         
+        #if the password is incorrect
         elif hash_password(password) != stats["password"]:
                 username_input.input_text = ""
                 password_input.input_text = ""
@@ -389,7 +390,12 @@ def load_image(path:str, fallback_path:str,scale:bool, size:tuple[int, int], pre
         for format in SUPPORTED_IMAGE_FORMATS:
             if os.path.exists(f"{fallback_path}{format}"):
                 image = pygame.transform.flip(pygame.image.load(f"{fallback_path}{format}"), flip_x, flip_y)
-        
+                found_image = True
+    
+    if not found_image:
+        print("Couldn't load image")
+        return
+
     if scale:
         image = pygame.transform.scale(image, size)
 
@@ -413,9 +419,11 @@ def load_font(path:str, fallback_path:str, size:int):
 def load_sfx(path:str, fallback_path):
     if os.path.exists(path):
         sfx = pygame.mixer.Sound(path)
-    else:
+    elif os.path.exists(fallback_path):
         sfx = pygame.mixer.Sound(fallback_path)
-    
+    else:
+        print("Couldn't load sound effects")
+
     return sfx
 
 def load_resources(CAMPAIGN):
