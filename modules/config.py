@@ -20,7 +20,9 @@ game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "fall_distance": 0,
 }
 stats = {}
-def_stats = { #all time (per-user stats, primer: total jumps, min_jumps_in_game)
+
+# All-time, preferences, (per-user)
+def_stats = {
     "password": 0,                              #DONE
     "volume_master": 0.5,
     "volume_sfx": 0.1,
@@ -51,8 +53,8 @@ def_stats = { #all time (per-user stats, primer: total jumps, min_jumps_in_game)
     "finished_games": 0,
     "finish_rate": 0,
     "best_screen": 0,                           #DONE
-    "total_distance_climbed": 0,                #DONE                    #dodaj se za igro z najvecjo razliko
-    "total_distance_descended": 0,              #DONE                    #dodaj se za igro z najvecjo razliko
+    "total_distance_climbed": 0,                #DONE
+    "total_distance_descended": 0,              #DONE
     "highest_distance_climbed_in_game": 0,
     "highest_distance_descended_in_game": 0,
     #dodaj se za avg stvari in pogruntej!!!!!

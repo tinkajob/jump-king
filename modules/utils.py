@@ -250,8 +250,9 @@ def load_player_stats(PLAYER_NAME:str, stats:list):
         stats.clear()
         stats.update(loaded_stats)
     else:
+        # If the player's stats file doesn't exist (new player)
         for stat in stats:
-            stats[stat] = 0
+            stats[stat] = def_stats[stat]
     
     #ce trenutno v stats.json ni neke vrednosti (smo na novo uvedli/ponesreci zbrisana), jo nastavimo na fallback vrednost
     for key, value in def_stats.items():
