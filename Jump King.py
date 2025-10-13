@@ -1,4 +1,4 @@
-import pygame, sys, math
+import pygame, sys, math, os
 
 from modules.config import *
 from modules.objects import *
@@ -8,7 +8,7 @@ from modules.utils import log_in, draw_scene, load_player_stats, save_player_sta
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Jump King")
-pygame.display.set_icon(pygame.image.load(f"{fallback_resources_folder}/other/icon.png"))
+pygame.display.set_icon(pygame.image.load(os.path.join(fallback_resources_folder, "other", "icon.png")))#f"{fallback_resources_folder}/other/icon.png"))
 VOLUME_MASTER = def_stats["volume_master"]
 VOLUME_SFX = def_stats["volume_sfx"]
 VOLUME_MUSIC = def_stats["volume_music"]
@@ -18,13 +18,13 @@ while WINDOW_OPEN:
     current_menu = "login"
     music.play_menu(current_menu)
     
-    screen.blit(scaled_bgs[0], (-600, 0))
+    screen.blit(ui_bgs["login"], (-600, 0))
     submit_button_already_clicked = False
     notification.delete_notification()
     faded_in = False
 
     clock.tick()
-    while login:
+    while LOGIN:
         if not faded_in:
             effect.start_fade_in()
             faded_in = True
@@ -49,7 +49,7 @@ while WINDOW_OPEN:
                 sfx["click"].play()
             
             # We only want transition if music is different for login and main menu
-            if music_menus_instructions["login"] != music_menus_instructions["main"]:
+            if music_menus_instructions["login"] != music_menus_instructions["main_menu"]:
                 music.play_fadeout()
             submit_button_already_clicked = True
             PLAYER_NAME = username_input.input_text
@@ -63,17 +63,17 @@ while WINDOW_OPEN:
             next_scene = "quit"
             quit_button_already_clicked = True
 
-        draw_scene("login", screen, scaled_bgs, endscreens, 0, delta_time)
+        draw_scene("login", screen, scaled_bgs, ui_bgs, 0, delta_time)
         effect.update(delta_time, screen)
 
         if next_scene == "main_menu" and not effect.get_active():
-            
-            main_menu = True
-            login = False
+            MAIN_MENU = True
+            LOGIN = False
 
         if next_scene == "quit" and not effect.get_active():
-            login = False
+            LOGIN = False
             WINDOW_OPEN = False
+            QUITTING_GAME = True
 
         pygame.display.flip()
 
@@ -87,10 +87,10 @@ while WINDOW_OPEN:
     logout_button_already_clicked = False
     
     notification.delete_notification()
-    current_menu = "main"
+    current_menu = "main_menu"
     music.play_menu(current_menu)
 
-    while main_menu:
+    while MAIN_MENU:
         delta_time = clock.tick(60) / 1000.0 #tisto je FPS cap
         time_spent += delta_time
 
@@ -128,7 +128,7 @@ while WINDOW_OPEN:
                 sfx["click"].play()
 
             # We only want transition if music is different for login and main menu
-            if music_menus_instructions["login"] != music_menus_instructions["main"]:
+            if music_menus_instructions["login"] != music_menus_instructions["main_menu"]:
                 music.play_fadeout()
             next_scene = "login"
             effect.start_fade_out()
@@ -141,18 +141,21 @@ while WINDOW_OPEN:
             username_text.update()
             password_text.update()
 
-        draw_scene("main_menu", screen, scaled_bgs, endscreens)
+        draw_scene("main_menu", screen, scaled_bgs, ui_bgs)
         effect.update(delta_time, screen)
 
         if next_scene == "running" and not effect.get_active():
-            main_menu = False
-            running = True
+            MAIN_MENU = False
+            GAME_RUNNING = True
+        
         if next_scene == "quit" and not effect.get_active():
-            main_menu = False
+            MAIN_MENU = False
             WINDOW_OPEN = False
+            QUITTING_GAME = True
+        
         if next_scene == "login" and not effect.get_active():
-            login = True
-            main_menu = False
+            LOGIN = True
+            MAIN_MENU = False
             save_player_stats(PLAYER_NAME, stats)
 
         pygame.display.flip()
@@ -171,13 +174,13 @@ while WINDOW_OPEN:
     
     notification.delete_notification()
     start_time = pygame.time.get_ticks()
-    #current_menu = ""
     can_play_music = True
 
-    load_resources(CAMPAIGN) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
+    if not QUITTING_GAME:
+        load_resources(CAMPAIGN) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
     clock.tick()
 
-    while running:
+    while GAME_RUNNING:
         if not faded_in:
             effect.start_fade_in()
             faded_in = True
@@ -225,18 +228,19 @@ while WINDOW_OPEN:
             
         if next_scene == "endscreen" and not effect.get_active():
             can_play_music = False
-            endscreen = True
-            running = False
+            ENDSCREEN = True
+            GAME_RUNNING = False
             game_ended = True
 
         if next_scene == "quit" and not effect.get_active():
-            running = False
+            GAME_RUNNING = False
             WINDOW_OPEN = False
-            endscreen = False
+            ENDSCREEN = False
+            QUITTING_GAME = True
             game_ended = True
 
         if not game_ended:
-            draw_scene("running", screen, scaled_bgs, endscreens, current_level, delta_time)
+            draw_scene("running", screen, scaled_bgs, ui_bgs, current_level, delta_time)
 
         effect.update(delta_time, screen)
         pygame.display.flip()
@@ -252,7 +256,7 @@ while WINDOW_OPEN:
     notification.delete_notification()
     notification.show_notification(messages["endscreen"])
 
-    while endscreen:
+    while ENDSCREEN:
         delta_time = clock.tick(60) / 1000.0 # tisto je FPS cap
         time_spent += delta_time
 
@@ -271,7 +275,7 @@ while WINDOW_OPEN:
         notification.is_clicked()
 
         if next_scene == "endscreen" or ((next_scene == "main_menu" or next_scene == "quit") and effect.get_active()):
-            draw_scene("endscreen", screen, scaled_bgs, endscreens)
+            draw_scene("endscreen", screen, scaled_bgs, ui_bgs)
 
         if waiting_for_release:
             if not any(keys):
@@ -283,15 +287,16 @@ while WINDOW_OPEN:
             
         if next_scene == "main_menu" and not effect.get_active():
             save_player_stats(PLAYER_NAME, stats)
-            endscreen = False
-            main_menu = True
+            ENDSCREEN = False
+            MAIN_MENU = True
             faded_in = False
-            running = False
+            GAME_RUNNING = False
 
         if next_scene == "quit" and not effect.get_active():
             WINDOW_OPEN = False
-            main_menu = False
-            endscreen = False
+            MAIN_MENU = False
+            ENDSCREEN = False
+            QUITTING_GAME = True
 
         effect.update(delta_time, screen)
         pygame.display.flip()

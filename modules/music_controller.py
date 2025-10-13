@@ -1,7 +1,7 @@
 import pygame
 
-import modules.objects as objects
-from modules.pygame_objects import sfx
+#import modules.objects as objects
+from modules.pygame_objects import sfx, music_level_instructions, music_menus_instructions
 from modules.config import musics, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC
 
 class MusicController:
@@ -29,8 +29,8 @@ class MusicController:
     def play_level(self:object, current_level:int):
         """Plays the correct song based on the input"""     
 
-        if objects.music_level_instructions:
-            self.requested_song = objects.music_level_instructions[current_level]
+        if music_level_instructions:
+            self.requested_song = music_level_instructions[current_level]
         else:
             self.requested_song == ""
 
@@ -56,7 +56,7 @@ class MusicController:
     def play_menu(self:object, current_menu:str):
         """Plays the main menu music"""
 
-        self.requested_song = objects.music_menus_instructions[current_menu]
+        self.requested_song = music_menus_instructions[current_menu]
 
         if self.current_song != self.requested_song:
             pygame.mixer.music.load(musics[self.requested_song])

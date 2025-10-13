@@ -184,11 +184,11 @@ def autotile(neighbors:list):
         return 46
     return 0 #prepisi da bo ku binary tree?
 
-def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, endscreens:list, current_level:int = 0, delta_time:float = 0):
+def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0):
     """Handles drawing scenes"""
 
     if scene == "main_menu":
-        screen.blit(scaled_bgs[0], dynamic_bg_pos(pygame.mouse.get_pos(), scaled_bgs[0], False, (-300, 0)))
+        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, (-300, 0)))
         objects.play_button.draw(screen)
         objects.quit_button.draw(screen)
         objects.logout_button.draw(screen)
@@ -199,7 +199,7 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, endscreens:lis
         objects.notification.draw(screen)
 
     elif scene == "running":
-        screen.blit(scaled_bgs[current_level + 1], dynamic_bg_pos(objects.player.get_center_pos(), scaled_bgs[current_level + 1]))
+        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objects.player.get_center_pos(), scaled_bgs[current_level]))
         screen.blit(objects.level_surfaces[current_level], (0, 0))
         objects.player.draw(screen)
         objects.main_babe.draw(screen, current_level, delta_time)
@@ -208,11 +208,11 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, endscreens:lis
         objects.notification.draw(screen)
     
     elif scene == "endscreen":
-        screen.blit(endscreens[0], dynamic_bg_pos(pygame.mouse.get_pos(), endscreens[0], False))
+        screen.blit(ui_bgs["endscreen"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["endscreen"], False))
         objects.notification.draw(screen)
 
     elif scene == "login":
-        screen.blit(scaled_bgs[0], dynamic_bg_pos(pygame.mouse.get_pos(), scaled_bgs[0], False, (-300, 0))) #(-600, 0)
+        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, (-300, 0))) #(-600, 0)
         objects.submit_button.draw(screen)
         objects.quit_button.draw(screen)
         objects.username_input.draw(screen)
@@ -357,29 +357,21 @@ def create_level_surface(level:object, tile_images:list):
 
     return level_surface
 
-def load_music_config(campaign:str = ""):
-    """Loads music instructions based on music_config.json"""
-    if campaign != "":
-        filepath = f"{campaigns_folder}/{campaign}/music_config.json"
+def load_config(CAMPAIGN = ""):
+    if CAMPAIGN:
+        filepath = os.path.join(campaigns_folder, CAMPAIGN, "config.json")
     else:
-        filepath = f"{campaigns_folder}/music_config.json"
+        filepath = os.path.join(campaigns_folder, "config.json")
 
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
-            data = json.load(file)
-            levels_config = data.get("levels", [])
-            menus_config  = data.get("menus", {"login": "", "main": "", "endscreen": ""})
+            return json.load(file)
 
-            objects.notification.show_notification(messages["loaded_music_config"])
-    else:
-        objects.notification.show_notification(messages["err_loading_music_config"])
-        return [], {"login": "", "main": "", "endscreen": ""}
-
-    return levels_config, menus_config
-
-def load_image(path:str, fallback_path:str,scale:bool, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
+def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resources_folder:str, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
     from modules.config import SUPPORTED_IMAGE_FORMATS
     
+    path = os.path.join(resources_folder, subfolder, filepath)
+    fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath)
     found_image = False
 
     for format in SUPPORTED_IMAGE_FORMATS:
@@ -397,7 +389,7 @@ def load_image(path:str, fallback_path:str,scale:bool, size:tuple[int, int], pre
         print("Couldn't load image")
         return
 
-    if scale:
+    if size[0] != 0 and size[1] != 0:
         image = pygame.transform.scale(image, size)
 
     if preserve_alpha:
@@ -417,7 +409,11 @@ def load_font(path:str, fallback_path:str, size:int):
     
     return font
 
-def load_sfx(path:str, fallback_path):
+def load_sfx(filepath:str, subfolder:str, format:str, resources_folder:str, fallback_resources_folder:str):
+
+    path = os.path.join(resources_folder, subfolder, filepath + format)
+    fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath + format)
+
     if os.path.exists(path):
         sfx = pygame.mixer.Sound(path)
     elif os.path.exists(fallback_path):
@@ -428,48 +424,48 @@ def load_sfx(path:str, fallback_path):
     return sfx
 
 def load_resources(CAMPAIGN):
-    from modules.config import fallback_resources_folder, tile_images_paths, player_images_paths, babe_images_paths, button_images_paths, button_load_sizes, bgs_images_paths, bg_resize_koeficient, endscreens_images_paths, sfx_keys, fonts_keys, fonts_sizes, fonts_names
-
-    resources_folder = f"campaigns/{CAMPAIGN}/resources"
+    # MYB this pass as parameters?
+    from modules.config import fallback_resources_folder, tile_images_paths, player_images_paths, babe_images_paths, button_images_paths, button_load_sizes, bg_resize_koeficient, sfx_keys, fonts_keys, fonts_sizes, fonts_names, ui_bgs_sizes
+    from modules.pygame_objects import ui_bgs_images_paths, bgs_images_paths
+    resources_folder = os.path.join("campaigns", CAMPAIGN, "resources")
 
     # zloadamo s campaign resources
     tile_images = []
     for i in range(len(tile_images_paths)):
         tile_images.append(None)
-        tile_images[i] = load_image(resources_folder + tile_images_paths[i],fallback_resources_folder + tile_images_paths[i], True, (tile_size, tile_size), True)
+        tile_images[i] = load_image(tile_images_paths[i], "tiles", resources_folder, fallback_resources_folder, (tile_size, tile_size), True)
 
     player_images = []
     for i in range(len(player_images_paths)):
         player_images.append(None)
-        player_images[i] = load_image(resources_folder + player_images_paths[i], fallback_resources_folder + player_images_paths[i], True, (80, 80), True)
+        player_images[i] = load_image(player_images_paths[i], "player_animation", resources_folder, fallback_resources_folder, (80, 80), True)
 
     babe_images = []
     for i in range(len(babe_images_paths)):
         babe_images.append(None)
-        babe_images[i] = load_image(resources_folder + babe_images_paths[i], fallback_resources_folder + babe_images_paths[i], True, (80, 80), True)
+        babe_images[i] = load_image(babe_images_paths[i], "babe_animation", resources_folder, fallback_resources_folder, (80, 80), True)
 
     buttons = []
     for i in range(len(button_images_paths)):
         buttons.append(None)
-        buttons[i] = load_image(resources_folder + button_images_paths[i], fallback_resources_folder + button_images_paths[i], True, button_load_sizes[i], True)
+        buttons[i] = load_image(button_images_paths[i], "other", resources_folder, fallback_resources_folder, button_load_sizes[i], True)
 
     scaled_bgs = []
     for i in range(len(bgs_images_paths)):
         scaled_bgs.append(None)
-        scaled_bgs[i] = load_image(resources_folder + bgs_images_paths[i], fallback_resources_folder + bgs_images_paths[i], True, (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
+        scaled_bgs[i] = load_image(bgs_images_paths[i], "bgs", resources_folder, fallback_resources_folder, (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
 
-    endscreens = []
-    for i in range(len(endscreens_images_paths)):
-        endscreens.append(None)
-        endscreens[i] = load_image(resources_folder + endscreens_images_paths[i], fallback_resources_folder + endscreens_images_paths[i], True, (1332 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
+    ui_bgs = {}
+    for key, value in ui_bgs_images_paths.items():
+        ui_bgs[key] = load_image(value, "bgs", resources_folder, fallback_resources_folder, ui_bgs_sizes[key])
 
     sfx = {}
     for i in range(len(sfx_keys)):
-        sfx[sfx_keys[i]] = load_sfx(f"{resources_folder}/sfx/{sfx_keys[i]}.wav", f"{fallback_resources_folder}/sfx/{sfx_keys[i]}.wav")
+        sfx[sfx_keys[i]] = load_sfx(sfx_keys[i], "sfx", ".wav", resources_folder,fallback_resources_folder)
 
     fonts = {}
     for i in range(len(fonts_keys)):
         fonts[fonts_keys[i]] = load_font(f"{resources_folder}/other/{fonts_names[i]}.otf", f"{fallback_resources_folder}/other/{fonts_names[i]}.otf", fonts_sizes[i])
 
-    return tile_images, player_images, babe_images, buttons, scaled_bgs, endscreens, sfx, fonts
+    return tile_images, player_images, babe_images, buttons, scaled_bgs, ui_bgs, sfx, fonts
         
