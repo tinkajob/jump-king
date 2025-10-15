@@ -8,7 +8,7 @@ from modules.utils import log_in, draw_scene, load_player_stats, save_player_sta
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Jump King")
-pygame.display.set_icon(pygame.image.load(os.path.join(fallback_resources_folder, "other", "icon.png")))#f"{fallback_resources_folder}/other/icon.png"))
+pygame.display.set_icon(pygame.image.load(os.path.join(fallback_resources_folder, "other", "icon.png")))
 VOLUME_MASTER = def_stats["volume_master"]
 VOLUME_SFX = def_stats["volume_sfx"]
 VOLUME_MUSIC = def_stats["volume_music"]
