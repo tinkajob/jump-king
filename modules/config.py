@@ -101,6 +101,7 @@ sfx_keys = [
 #============================= USER INTERFACE =============================
 faded_in = False
 game_ended = False
+FPS_cap_game, FPS_cap_menus = 144, 60
 bg_resize_koeficient = 1.05
 current_menu = "login"
 next_scene = "login"

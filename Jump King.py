@@ -17,7 +17,7 @@ music.set_volume(sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
 while WINDOW_OPEN:
     current_menu = "login"
     music.play_menu(current_menu)
-    
+
     screen.blit(ui_bgs["login"], (-600, 0))
     submit_button_already_clicked = False
     notification.delete_notification()
@@ -25,11 +25,12 @@ while WINDOW_OPEN:
 
     clock.tick()
     while LOGIN:
+        # If we havent already started fade-in (first frame) we start fade-in
         if not faded_in:
             effect.start_fade_in()
             faded_in = True
 
-        delta_time = clock.tick(60) / 1000.0 #tisto je FPS cap
+        delta_time = clock.tick(FPS_cap_menus) / 1000.0
         time_spent += delta_time
         events = pygame.event.get()
 
@@ -39,7 +40,7 @@ while WINDOW_OPEN:
                 effect.start_fade_out()
                 next_scene = "quit"
                 music.play_fadeout()
-        
+
         username_input.capture_input(events, username_text, password_text)
         password_input.capture_input(events, username_text, password_text)
         cursor.update()
@@ -47,7 +48,7 @@ while WINDOW_OPEN:
         if submit_button.is_clicked():
             if not submit_button_already_clicked:
                 sfx["click"].play()
-            
+
             # We only want transition if music is different for login and main menu
             if music_menus_instructions["login"] != music_menus_instructions["main_menu"]:
                 music.play_fadeout()
@@ -85,13 +86,13 @@ while WINDOW_OPEN:
     play_button_already_clicked = False
     quit_button_already_clicked = False
     logout_button_already_clicked = False
-    
+
     notification.delete_notification()
     current_menu = "main_menu"
     music.play_menu(current_menu)
 
     while MAIN_MENU:
-        delta_time = clock.tick(60) / 1000.0 #tisto je FPS cap
+        delta_time = clock.tick(FPS_cap_menus) / 1000.0
         time_spent += delta_time
 
         if not faded_in:
@@ -114,7 +115,7 @@ while WINDOW_OPEN:
             next_scene = "running"
             play_button_already_clicked = True
             stats["games_started"] += 1
-        
+
         if quit_button.is_clicked():
             if not quit_button_already_clicked:
                 sfx["click"].play()
@@ -147,31 +148,31 @@ while WINDOW_OPEN:
         if next_scene == "running" and not effect.get_active():
             MAIN_MENU = False
             GAME_RUNNING = True
-        
+
         if next_scene == "quit" and not effect.get_active():
             MAIN_MENU = False
             WINDOW_OPEN = False
             QUITTING_GAME = True
-        
+
         if next_scene == "login" and not effect.get_active():
             LOGIN = True
             MAIN_MENU = False
             save_player_stats(PLAYER_NAME, stats)
 
         pygame.display.flip()
-    
+
     if next_scene != "login":
         pygame.mixer.music.stop()
         music.play_level(current_level)
-    
+
     current_level = 0
     level = levels[current_level]
     faded_in = False
     game_ended = False
-    
+
     player.reset_position(SCREEN_WIDTH / 2 - player_size / 2, 891)
     player.reset_values()
-    
+
     notification.delete_notification()
     start_time = pygame.time.get_ticks()
     can_play_music = True
@@ -184,7 +185,7 @@ while WINDOW_OPEN:
         if not faded_in:
             effect.start_fade_in()
             faded_in = True
-        delta_time = clock.tick(144) / 1000.0 #tisto je FPS cap
+        delta_time = clock.tick(FPS_cap_game) / 1000.0
         time_spent += delta_time
         time = pygame.time.get_ticks() - start_time
         keys = pygame.key.get_pressed()
@@ -225,7 +226,7 @@ while WINDOW_OPEN:
 
         if can_play_music:
             music.play_level(current_level)
-            
+
         if next_scene == "endscreen" and not effect.get_active():
             can_play_music = False
             ENDSCREEN = True
@@ -257,19 +258,19 @@ while WINDOW_OPEN:
     notification.show_notification(messages["endscreen"])
 
     while ENDSCREEN:
-        delta_time = clock.tick(60) / 1000.0 # tisto je FPS cap
+        delta_time = clock.tick(FPS_cap_menus) / 1000.0
         time_spent += delta_time
 
         if not faded_in:
             effect.start_fade_in()
             faded_in = True
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 effect.start_fade_out()
                 music.play_fadeout()
                 next_scene = "quit"
-        
+
         keys = pygame.key.get_pressed()
 
         notification.is_clicked()
@@ -284,7 +285,7 @@ while WINDOW_OPEN:
             music.play_fadeout()
             effect.start_fade_out()
             next_scene = "main_menu"
-            
+
         if next_scene == "main_menu" and not effect.get_active():
             save_player_stats(PLAYER_NAME, stats)
             ENDSCREEN = False
