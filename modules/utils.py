@@ -1,15 +1,15 @@
 import os, json, hashlib, pygame
 
-from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH
+from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, campaigns_folder, messages, bg_resize_koeficient
 from modules.platform import Platform
 import modules.objects as objects
-from modules.pygame_objects import endscreens, scaled_bgs, tile_images
+#from modules.pygame_objects import endscreens, scaled_bgs, tile_images
 
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, username_text:str, password_text:str, stats:list):
     """Handles user login and account creation based on provided inputs."""
 
     load_player_stats(username, stats)
-    if username != "" and username.lower() != "guest": #ce je player
+    if username != "" and username.lower() != "guest":
         if stats.get("password", 0) == 0:
             stats["password"] = hash_password(password)
             title.text = f"Welcome, {username}!"
@@ -17,6 +17,7 @@ def log_in(username:str, password:str, title:str, effect:object, username_input:
             effect.start_fade_out()
             return "main_menu"
         
+        #if the password is incorrect
         elif hash_password(password) != stats["password"]:
                 username_input.input_text = ""
                 password_input.input_text = ""
@@ -183,11 +184,11 @@ def autotile(neighbors:list):
         return 46
     return 0 #prepisi da bo ku binary tree?
 
-def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_time:float = 0):
+def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0):
     """Handles drawing scenes"""
 
     if scene == "main_menu":
-        screen.blit(scaled_bgs[0], dynamic_bg_pos(pygame.mouse.get_pos(), scaled_bgs[0], False, (-300, 0)))
+        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, (-300, 0)))
         objects.play_button.draw(screen)
         objects.quit_button.draw(screen)
         objects.logout_button.draw(screen)
@@ -198,7 +199,7 @@ def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_ti
         objects.notification.draw(screen)
 
     elif scene == "running":
-        screen.blit(scaled_bgs[current_level + 1], dynamic_bg_pos(objects.player.get_center_pos(), scaled_bgs[current_level + 1]))
+        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objects.player.get_center_pos(), scaled_bgs[current_level]))
         screen.blit(objects.level_surfaces[current_level], (0, 0))
         objects.player.draw(screen)
         objects.main_babe.draw(screen, current_level, delta_time)
@@ -207,11 +208,11 @@ def draw_scene(scene:str, screen:pygame.Surface, current_level:int = 0, delta_ti
         objects.notification.draw(screen)
     
     elif scene == "endscreen":
-        screen.blit(endscreens[0], dynamic_bg_pos(pygame.mouse.get_pos(), endscreens[0], False))
+        screen.blit(ui_bgs["endscreen"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["endscreen"], False))
         objects.notification.draw(screen)
 
     elif scene == "login":
-        screen.blit(scaled_bgs[0], dynamic_bg_pos(pygame.mouse.get_pos(), scaled_bgs[0], False, (-300, 0))) #(-600, 0)
+        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, (-300, 0))) #(-600, 0)
         objects.submit_button.draw(screen)
         objects.quit_button.draw(screen)
         objects.username_input.draw(screen)
@@ -249,9 +250,11 @@ def load_player_stats(PLAYER_NAME:str, stats:list):
         stats.clear()
         stats.update(loaded_stats)
     else:
+        # If the player's stats file doesn't exist (new player)
         for stat in stats:
-            stats[stat] = 0
+            stats[stat] = def_stats[stat]
     
+    #ce trenutno v stats.json ni neke vrednosti (smo na novo uvedli/ponesreci zbrisana), jo nastavimo na fallback vrednost
     for key, value in def_stats.items():
         if key not in stats:
             stats[key] = value
@@ -290,17 +293,45 @@ def update_player_stats(stats:list):
     if stats["highest_distance_descended_in_game"] < game_stats["distance_descended"]:
         stats["highest_distance_descended_in_game"] = game_stats["distance_descended"]
 
-def detect_levels(levels_folder:str, level_paths:list):
+def detect_levels(campaign:str, campaigns_folder:str, level_paths:list):
     """Goes trough all files in given folder and adds them to list of levels *(ordered alphabetically)*"""
-    for root, _, files in os.walk(f"{levels_folder}"): # root in _ sta ztu kr os.walk vrne tuple 3 stvari, ampak mi rabmo samo seznam filesov
-        for file in files:
-            if file.endswith(".txt"):
-                level_paths.append(f"{levels_folder}/{file}")
+    if campaign != "":
+        filepath = f"{campaigns_folder}/{campaign}/levels"
+    else:
+        filepath = f"{campaigns_folder}"
+
+    root, dirs, files = list_current_folder(filepath)
+    
+    if not files: #tu je za zdej, dokler ne nardim dropdown al neki za zbirat campaign!!
+        print(messages["err_empty_campaign"])
+        filepath = f"{campaigns_folder}"
+        root, dirs, files = list_current_folder(filepath)
+
+    for file in files:
+        if file.endswith(".txt"):
+            level_paths.append(f"{filepath}/{file}")
     level_paths.sort()
     return level_paths
 
+def list_current_folder(path:str):
+    """Walks the current folder and outputs all items in that folder"""
+
+    if not os.path.exists(path):
+        return "", [], []
+
+    dirs = []
+    files = []
+
+    with os.scandir(path) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                dirs.append(entry.name)
+            elif entry.is_file():
+                files.append(entry.name)
+    return path, dirs, files
+
 def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite_dir:bool = True, offset:tuple [int, int] = (0, 0)):
-    """Returns tuple containing positions for images to displace background"""
+    """Returns tuple containing positions for images to offset background"""
     
     bg_pos = [0, 0]
     if bg_image.get_width() / SCREEN_WIDTH > bg_image.get_height() / SCREEN_HEIGHT:
@@ -317,7 +348,7 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
 
     return (bg_pos[0], bg_pos[1])
 
-def create_level_surface(level):
+def create_level_surface(level:object, tile_images:list):
     """Creates level surface by combining all platforms/tiles into one surface"""
     level_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 
@@ -325,3 +356,116 @@ def create_level_surface(level):
         level_surface.blit(tile_images[platform.type], (platform.rect.x, platform.rect.y))
 
     return level_surface
+
+def load_config(CAMPAIGN = ""):
+    if CAMPAIGN:
+        filepath = os.path.join(campaigns_folder, CAMPAIGN, "config.json")
+    else:
+        filepath = os.path.join(campaigns_folder, "config.json")
+
+    if os.path.exists(filepath):
+        with open(filepath, "r") as file:
+            return json.load(file)
+
+def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resources_folder:str, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
+    from modules.config import SUPPORTED_IMAGE_FORMATS
+    
+    path = os.path.join(resources_folder, subfolder, filepath)
+    fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath)
+    found_image = False
+
+    for format in SUPPORTED_IMAGE_FORMATS:
+        if os.path.exists(f"{path}{format}"):
+            image = pygame.transform.flip(pygame.image.load(f"{path}{format}"), flip_x, flip_y)
+            found_image = True
+    
+    if not found_image:
+        for format in SUPPORTED_IMAGE_FORMATS:
+            if os.path.exists(f"{fallback_path}{format}"):
+                image = pygame.transform.flip(pygame.image.load(f"{fallback_path}{format}"), flip_x, flip_y)
+                found_image = True
+    
+    if not found_image:
+        print("Couldn't load image")
+        return
+
+    if size[0] != 0 and size[1] != 0:
+        image = pygame.transform.scale(image, size)
+
+    if preserve_alpha:
+        return image.convert_alpha()
+    else:
+        return image.convert()
+
+def load_font(path:str, fallback_path:str, size:int):
+    if os.path.exists(path):
+        font = pygame.font.Font(path, size)
+    
+    elif os.path.exists(fallback_path):
+        font = pygame.font.Font(fallback_path, size)
+
+    else:
+        font = pygame.font.Font(None, size)
+    
+    return font
+
+def load_sfx(filepath:str, subfolder:str, format:str, resources_folder:str, fallback_resources_folder:str):
+
+    path = os.path.join(resources_folder, subfolder, filepath + format)
+    fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath + format)
+
+    if os.path.exists(path):
+        sfx = pygame.mixer.Sound(path)
+    elif os.path.exists(fallback_path):
+        sfx = pygame.mixer.Sound(fallback_path)
+    else:
+        print("Couldn't load sound effects")
+
+    return sfx
+
+def load_resources(CAMPAIGN):
+    # MYB this pass as parameters?
+    from modules.config import fallback_resources_folder, tile_images_paths, player_images_paths, babe_images_paths, button_images_paths, button_load_sizes, bg_resize_koeficient, sfx_keys, fonts_keys, fonts_sizes, fonts_names, ui_bgs_sizes
+    from modules.pygame_objects import ui_bgs_images_paths, bgs_images_paths
+    resources_folder = os.path.join("campaigns", CAMPAIGN, "resources")
+
+    # zloadamo s campaign resources
+    tile_images = []
+    for i in range(len(tile_images_paths)):
+        tile_images.append(None)
+        tile_images[i] = load_image(tile_images_paths[i], "tiles", resources_folder, fallback_resources_folder, (tile_size, tile_size), True)
+
+    player_images = []
+    for i in range(len(player_images_paths)):
+        player_images.append(None)
+        player_images[i] = load_image(player_images_paths[i], "player_animation", resources_folder, fallback_resources_folder, (80, 80), True)
+
+    babe_images = []
+    for i in range(len(babe_images_paths)):
+        babe_images.append(None)
+        babe_images[i] = load_image(babe_images_paths[i], "babe_animation", resources_folder, fallback_resources_folder, (80, 80), True)
+
+    buttons = []
+    for i in range(len(button_images_paths)):
+        buttons.append(None)
+        buttons[i] = load_image(button_images_paths[i], "other", resources_folder, fallback_resources_folder, button_load_sizes[i], True)
+
+    scaled_bgs = []
+    for i in range(len(bgs_images_paths)):
+        scaled_bgs.append(None)
+        scaled_bgs[i] = load_image(bgs_images_paths[i], "bgs", resources_folder, fallback_resources_folder, (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
+
+    ui_bgs = {}
+    for key, value in ui_bgs_images_paths.items():
+        ui_bgs[key] = load_image(value, "bgs", resources_folder, fallback_resources_folder, ui_bgs_sizes[key])
+
+    sfx = {}
+    for i in range(len(sfx_keys)):
+        sfx[sfx_keys[i]] = load_sfx(sfx_keys[i], "sfx", ".wav", resources_folder,fallback_resources_folder)
+
+    fonts = {}
+    for i in range(len(fonts_keys)):
+        fonts[fonts_keys[i]] = load_font(f"{resources_folder}/other/{fonts_names[i]}.otf", f"{fallback_resources_folder}/other/{fonts_names[i]}.otf", fonts_sizes[i])
+
+    return tile_images, player_images, babe_images, buttons, scaled_bgs, ui_bgs, sfx, fonts
+        

@@ -1,10 +1,12 @@
 #============================= OTHER =============================
 SCREEN_WIDTH, SCREEN_HEIGHT = 1320, 1000
-running, main_menu, endscreen, login, waiting_for_release, WINDOW_OPEN = False, False, False, True, True, True
+CAMPAIGN = "main"
+GAME_RUNNING, MAIN_MENU, ENDSCREEN, LOGIN, waiting_for_release, WINDOW_OPEN = False, False, False, True, True, True
+QUITTING_GAME = False
 current_level, current_frame, time_spent = 0, 0, 0
 start_time, hours, minutes, seconds = 0, 0, 0, 0
 tile_size = 40
-stats_folder, levels_folder, resources_folder = "stats", "levels", "resources"
+stats_folder, campaigns_folder, fallback_resources_folder = "stats", "campaigns", "resources"
 level_paths = []
 game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "jumps": 0,
@@ -19,8 +21,13 @@ game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "fall_distance": 0,
 }
 stats = {}
-def_stats = { #all time (per-user stats, primer: total jumps, min_jumps_in_game)
+
+# All-time, preferences, (per-user)
+def_stats = {
     "password": 0,                              #DONE
+    "volume_master": 0.5,
+    "volume_sfx": 0.1,
+    "volume_music": 0.1,
     "total_playtime": 0,
     "personal_best_time": 0,
     "avg_completion_time": 0,
@@ -47,8 +54,8 @@ def_stats = { #all time (per-user stats, primer: total jumps, min_jumps_in_game)
     "finished_games": 0,
     "finish_rate": 0,
     "best_screen": 0,                           #DONE
-    "total_distance_climbed": 0,                #DONE                    #dodaj se za igro z najvecjo razliko
-    "total_distance_descended": 0,              #DONE                    #dodaj se za igro z najvecjo razliko
+    "total_distance_climbed": 0,                #DONE
+    "total_distance_descended": 0,              #DONE
     "highest_distance_climbed_in_game": 0,
     "highest_distance_descended_in_game": 0,
     #dodaj se za avg stvari in pogruntej!!!!!
@@ -63,26 +70,39 @@ PLAYER_NAME = ""
 #============================= PLAYER & ENTITIES =============================
 
 #============================= SOUND =============================
+VOLUME_MASTER = 0.5 #s tem volumom zacnemo!
+VOLUME_SFX = 0.1
+VOLUME_MUSIC = 0.1
 musics = {
-    "main_menu":    f"{resources_folder}/music/main_menu.mp3",
-    "sewer":        f"{resources_folder}/music/sewer.mp3",
-    "fallen_king":  f"{resources_folder}/music/fallen_king.mp3",
-    "despair":      f"{resources_folder}/music/despair.mp3",
-    "masse":        f"{resources_folder}/music/masse.mp3",
-    "sky_blue":     f"{resources_folder}/music/sky_blue.mp3",
-    "coronation":   f"{resources_folder}/music/coronation.mp3",
-    "sunrise":      f"{resources_folder}/music/sunrise.mp3",
-    "legend":       f"{resources_folder}/music/a_legend_lives_on.mp3",
-    "zacasno":      f"{resources_folder}/music/bg_music.mp3",
+    "main_menu":    f"{fallback_resources_folder}/music/main_menu.mp3",
+    "sewer":        f"{fallback_resources_folder}/music/sewer.mp3",
+    "fallen_king":  f"{fallback_resources_folder}/music/fallen_king.mp3",
+    "despair":      f"{fallback_resources_folder}/music/despair.mp3",
+    "masse":        f"{fallback_resources_folder}/music/masse.mp3",
+    "sky_blue":     f"{fallback_resources_folder}/music/sky_blue.mp3",
+    "coronation":   f"{fallback_resources_folder}/music/coronation.mp3",
+    "sunrise":      f"{fallback_resources_folder}/music/sunrise.mp3",
+    "legend":       f"{fallback_resources_folder}/music/a_legend_lives_on.mp3",
+    "zacasno":      f"{fallback_resources_folder}/music/bg_music.mp3",
 }
+music_level_instructions = []
+music_menus_instructions = {}
 can_play_music = True
 play_button_already_clicked, quit_button_already_clicked, submit_button_already_clicked, logout_button_already_clicked = False, False, False, False
+sfx_keys = [
+    "click",
+    "jump",
+    "bounce",
+    "landing",
+    "fall",
+]
 #============================= SOUND =============================
 
 #============================= USER INTERFACE =============================
 faded_in = False
 game_ended = False
 bg_resize_koeficient = 1.05
+current_menu = "login"
 next_scene = "login"
 title_text = "Welcome!"
 sizes = {
@@ -121,6 +141,118 @@ messages = {
     "greeting_new": f"Welcome, {PLAYER_NAME}",
     "greeting_guest": f"Logged in as guest. You are using shared stats.",
     "err_password": f"ERROR logging in!\nPassword you entered is incorrect!",
+    "err_loading_music_config": f"Failed to load config file for music!",
+    "err_empty_campaign": f"This campaign has no levels!", 
+    "loaded_music_config": f"Music config loaded successfully!",
     "endscreen": f"Press any key to continue...",
 }
+tile_images_paths = [
+    "tile_1",
+    "tile_2",
+    "tile_3",
+    "tile_4",
+    "tile_5",
+    "tile_6",
+    "tile_7",
+    "tile_8",
+    "tile_9",
+    "tile_10",
+    "tile_11",
+    "tile_12",
+    "tile_13",
+    "tile_14",
+    "tile_15",
+    "tile_16",
+    "tile_17",
+    "tile_18",
+    "tile_19",
+    "tile_20",
+    "tile_21",
+    "tile_22",
+    "tile_23",
+    "tile_24",
+    "tile_25",
+    "tile_26",
+    "tile_27",
+    "tile_28",
+    "tile_29",
+    "tile_30",
+    "tile_31",
+    "tile_32",
+    "tile_33",
+    "tile_34",
+    "tile_35",
+    "tile_36",
+    "tile_37",
+    "tile_38",
+    "tile_39",
+    "tile_40",
+    "tile_41",
+    "tile_42",
+    "tile_43",
+    "tile_44",
+    "tile_45",
+    "tile_46",
+    "tile_47",
+]
+player_images_paths = [
+    "player_standing",
+    "player_running1",
+    "player_running2",
+    "player_running3",
+    "player_running2",
+    "player_charging",
+    "player_jumping1",
+    "player_jumping2",
+    "player_falling",
+    "player_lying",
+]
+babe_images_paths = [
+    "1",
+    "2",
+    "3",
+]
+button_images_paths = [
+    "button",
+    "button_highlited",
+    "button_pressed",
+    "button",
+    "button_highlited",
+    "button_pressed",
+]
+button_load_sizes = [
+    sizes["play_button"],
+    sizes["play_button"],
+    sizes["play_button"],
+    sizes["quit_button"],
+    sizes["quit_button"],
+    sizes["quit_button"],
+]
+bgs_images_paths = []
+ui_bgs_sizes = {
+    "login": (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient),
+    "main_menu": (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient),
+    "endscreen": (1332 * bg_resize_koeficient, 1000 * bg_resize_koeficient)
+}
+ui_bgs_images_paths = {}
+fonts_names = [
+    "font",
+    "font",
+    "font",
+    "",
+    "",
+    "",
+]
+fonts_sizes = [36, 30, 70, 36, 50, 30]
+fonts_keys = [
+    "normal",
+    "smaller",
+    "title",
+    "timer",
+    "bold",
+    "notification",
+]
+SUPPORTED_IMAGE_FORMATS = [
+    ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tga", ".webp", ".tif", ".tiff"
+]
 #============================= USER INTERFACE =============================

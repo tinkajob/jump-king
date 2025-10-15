@@ -1,4 +1,4 @@
-import pygame, math, textwrap
+import pygame, math
 from modules.config import colors
 from modules.pygame_objects import fonts, buttons
 
@@ -307,3 +307,8 @@ class Notification:
                 self.is_visible = False
                 return True
             return False
+        
+class Slider:
+    def __init__(self:object, max_value):
+        self.max_value = max_value
+        pass

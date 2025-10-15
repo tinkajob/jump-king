@@ -1,0 +1,27 @@
+{
+    "icon": "icon.png",
+    "ui_music": {
+        "login": "main_menu",
+        "main_menu": "main_menu",
+        "endscreen": "sunrise"
+
+    },
+    "levels_music": [
+        "",
+        "",
+        "sewer",
+        "sewer"
+    ],
+    "COMMENT": "For the backgrounds you need to type in the name (format - .png, .jpg, ... wil be added automatically) of the image you want for your level (it needs to be in resources/bgs/)",
+    "game_backgrounds":[
+        "bg0",
+        "bg1", 
+        "bg2",
+        "bg3"
+    ],
+    "ui_backgrounds":{
+        "login": "login",
+        "main_menu": "main_menu", 
+        "endscreen": "endscreen"
+    }
+}
