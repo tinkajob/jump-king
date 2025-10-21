@@ -14,8 +14,8 @@
     ],
     "COMMENT": "For the backgrounds you need to type in the name (format - .png, .jpg, ... wil be added automatically) of the image you want for your level (it needs to be in resources/bgs/)",
     "game_backgrounds":[
-        "bg0",
-        "bg1", 
+        "bg3",
+        "bg3", 
         "bg2",
         "bg3",
         "bg4"
