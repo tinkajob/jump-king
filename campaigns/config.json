@@ -24,5 +24,9 @@
         "login": "login",
         "main_menu": "main_menu", 
         "endscreen": "endscreen"
-    }
+    },
+    "babe_position":[
+        800,
+        200
+    ]
 }

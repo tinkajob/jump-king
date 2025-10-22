@@ -259,10 +259,10 @@ def load_player_stats(PLAYER_NAME:str, stats:list):
         if key not in stats:
             stats[key] = value
 
-def wipe_stats(PLAYER_NAME:str, stats:list):
+def wipe_stats(PLAYER_NAME:str, stats:list, def_stats:list):
     """Resets all player values to 0 and saves them"""
     for stat in stats:
-        stats[stat] = 0
+        stats[stat] = def_stats[stat]
     save_player_stats(PLAYER_NAME, stats)
 
 def update_player_stats(stats:list):
@@ -296,9 +296,9 @@ def update_player_stats(stats:list):
 def detect_levels(campaign:str, campaigns_folder:str, level_paths:list):
     """Goes trough all files in given folder and adds them to list of levels *(ordered alphabetically)*"""
     if campaign != "":
-        filepath = f"{campaigns_folder}/{campaign}/levels"
+        filepath = os.path.join(campaigns_folder, campaign, "levels") #f"{campaigns_folder}/{campaign}/levels"
     else:
-        filepath = f"{campaigns_folder}"
+        filepath = os.path.join(campaigns_folder, "levels") #f"{campaigns_folder}"
 
     root, dirs, files = list_current_folder(filepath)
     
@@ -315,7 +315,6 @@ def detect_levels(campaign:str, campaigns_folder:str, level_paths:list):
 
 def list_current_folder(path:str):
     """Walks the current folder and outputs all items in that folder"""
-
     if not os.path.exists(path):
         return "", [], []
 
@@ -410,7 +409,6 @@ def load_font(path:str, fallback_path:str, size:int):
     return font
 
 def load_sfx(filepath:str, subfolder:str, format:str, resources_folder:str, fallback_resources_folder:str):
-
     path = os.path.join(resources_folder, subfolder, filepath + format)
     fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath + format)
 

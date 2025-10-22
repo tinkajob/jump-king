@@ -31,3 +31,13 @@ class BabeController:
         if self.rect.colliderect(player.rect) and self.is_visible:
            return True
         return False
+    
+    def find_position(self, config_pos:list, last_level:list):
+        # mu damo noter podatke iz config.json in uporabimo tiste vrednosti, 
+        # ce niso nastavljeni, ce ne obstajajo ali pa ce niso mozni (-1, -1), potem pa poiscemo najvisje lezeco ustrezno platformo 
+        # Ustrezna platforma: usaj 2 tiles v vrsti, nad njimi usaj 3 visina prosta
+        if config_pos:
+            self.rect.x = config_pos[0]
+            self.rect.y = config_pos[1]
+        else:
+            pass

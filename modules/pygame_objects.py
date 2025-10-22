@@ -16,5 +16,6 @@ music_menus_instructions = config.get("ui_music", {"login": "", "main_menu": "",
 bgs_images_paths = config.get("game_backgrounds", [])
 ui_bgs_images_paths = config.get("ui_backgrounds", {"login": "", "main_menu": "", "endscreen": ""})
 icon_name = config.get("icon")
+babe_position = config.get("babe_position", [])
 
 tile_images, player_images, babe_images, buttons, scaled_bgs, ui_bgs, sfx, fonts = load_resources(CAMPAIGN)
