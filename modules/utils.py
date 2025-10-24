@@ -338,12 +338,13 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
     else:
         displacement_koeficient = (bg_image.get_width() - SCREEN_WIDTH) / SCREEN_WIDTH
 
-    bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) + (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + offset[0]
-    bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) + (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + offset[1]
 
     if not opposite_dir:
-        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) - (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + offset [0]
-        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) - (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + offset[1]
+        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) - (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
+        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) - (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
+    else:
+        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) + (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
+        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) + (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
 
     return (bg_pos[0], bg_pos[1])
 
