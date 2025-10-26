@@ -177,10 +177,10 @@ while WINDOW_OPEN:
     start_time = pygame.time.get_ticks()
     can_play_music = True
 
-    main_babe.find_position(babe_position, levels[len(levels) - 1]) # Find babe position based on config file or automatically
 
     if not QUITTING_GAME:
         load_resources(CAMPAIGN) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
+        main_babe.find_position(babe_position, levels[len(levels) - 1], tile_size, SCREEN_WIDTH, SCREEN_HEIGHT) # Find babe position based on config file or automatically
     clock.tick()
 
     while GAME_RUNNING:

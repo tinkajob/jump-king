@@ -1,10 +1,10 @@
 import os, json, hashlib, pygame
 
-from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, campaigns_folder, messages, bg_resize_koeficient
+from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, campaigns_folder, messages
 from modules.platform import Platform
 import modules.objects as objects
-#from modules.pygame_objects import endscreens, scaled_bgs, tile_images
 
+#MISCELANEOUS
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, username_text:str, password_text:str, stats:list):
     """Handles user login and account creation based on provided inputs."""
 
@@ -43,43 +43,6 @@ def hash_password(password:str):
     """Encrypts password using hash function"""
     password = str(password)
     return hashlib.sha256(password.encode()).hexdigest()
-
-def load_level_from_file(level_number:int):
-    """Based on ***level_number*** loads level data from file to list named ***level***"""
-
-    level = []
-    with open(level_paths[level_number], 'r') as file:
-        for line_number, line in enumerate(file, start = 1):
-            row = []
-            for char in line.strip():
-                if char.isdigit():
-                    row.append(int(char))
-            level.append(row)
-    return level
-
-def create_level(level_data:list):
-    """Based on list ***level_data***, which has level data stored inside creates level *(all the platforms for that level)*"""
-
-    rows = len(level_data)
-    cols = len(level_data[0]) if rows > 0 else 0
-    platforms = []
-    relative_offfsets = [ 
-        (-1, -1),   (0, -1),    (1, -1),
-        (-1, 0),                (1, 0),
-        (-1, 1),    (0, 1),     (1, 1)
-    ]
-    for row_index, row in enumerate(level_data):
-        for col_index, col in enumerate(row):
-            if col != 0:
-                neighbors = []
-                for relative_x, relative_y in relative_offfsets:
-                    offset_row, offset_col = row_index + relative_y, col_index + relative_x # dejanski offseti
-                    if (offset_row >= 0 and offset_row < rows) and (offset_col >= 0 and offset_col < cols):
-                        neighbors.append(level_data[offset_row][offset_col])
-                    else:
-                        neighbors.append(0)
-                platforms.append(Platform(col_index * tile_size, row_index * tile_size, tile_size, tile_size, autotile(neighbors)))
-    return platforms 
 
 def autotile(neighbors:list):
     """Based on list ***neighbors*** chooses correct image for each tile to display"""
@@ -184,6 +147,25 @@ def autotile(neighbors:list):
         return 46
     return 0 #prepisi da bo ku binary tree?
 
+def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite_dir:bool = True, offset:tuple [int, int] = (0, 0)):
+    """Returns tuple containing positions for images to offset background"""
+    
+    bg_pos = [0, 0]
+    if bg_image.get_width() / SCREEN_WIDTH > bg_image.get_height() / SCREEN_HEIGHT:
+        displacement_koeficient = (bg_image.get_height() - SCREEN_HEIGHT) / SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
+    else:
+        displacement_koeficient = (bg_image.get_width() - SCREEN_WIDTH) / SCREEN_WIDTH
+
+
+    if not opposite_dir:
+        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) - (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
+        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) - (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
+    else:
+        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) + (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
+        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) + (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
+
+    return (bg_pos[0], bg_pos[1])
+
 def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0):
     """Handles drawing scenes"""
 
@@ -224,6 +206,7 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objects.cursor.draw(screen, delta_time)
         objects.notification.draw(screen)
 
+# MANAGING PLAYER STATS
 def save_player_stats(PLAYER_NAME:str, stats:list):
     """Saves player stats to its corresponding file"""
     os.makedirs(stats_folder, exist_ok=True)
@@ -293,6 +276,23 @@ def update_player_stats(stats:list):
     if stats["highest_distance_descended_in_game"] < game_stats["distance_descended"]:
         stats["highest_distance_descended_in_game"] = game_stats["distance_descended"]
 
+# LEVELS
+def list_current_folder(path:str):
+    """Walks the current folder and outputs all items in that folder"""
+    if not os.path.exists(path):
+        return "", [], []
+
+    dirs = []
+    files = []
+
+    with os.scandir(path) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                dirs.append(entry.name)
+            elif entry.is_file():
+                files.append(entry.name)
+    return path, dirs, files
+
 def detect_levels(campaign:str, campaigns_folder:str, level_paths:list):
     """Goes trough all files in given folder and adds them to list of levels *(ordered alphabetically)*"""
     if campaign != "":
@@ -313,40 +313,42 @@ def detect_levels(campaign:str, campaigns_folder:str, level_paths:list):
     level_paths.sort()
     return level_paths
 
-def list_current_folder(path:str):
-    """Walks the current folder and outputs all items in that folder"""
-    if not os.path.exists(path):
-        return "", [], []
+def load_level_from_file(level_number:int):
+    """Based on ***level_number*** loads level data from file to list named ***level***"""
 
-    dirs = []
-    files = []
+    level = []
+    with open(level_paths[level_number], 'r') as file:
+        for line_number, line in enumerate(file, start = 1):
+            row = []
+            for char in line.strip():
+                if char.isdigit():
+                    row.append(int(char))
+            level.append(row)
+    return level
 
-    with os.scandir(path) as entries:
-        for entry in entries:
-            if entry.is_dir():
-                dirs.append(entry.name)
-            elif entry.is_file():
-                files.append(entry.name)
-    return path, dirs, files
+def create_level(level_data:list):
+    """Based on list ***level_data***, which has level data stored inside creates level *(all the platforms for that level)*"""
 
-def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite_dir:bool = True, offset:tuple [int, int] = (0, 0)):
-    """Returns tuple containing positions for images to offset background"""
-    
-    bg_pos = [0, 0]
-    if bg_image.get_width() / SCREEN_WIDTH > bg_image.get_height() / SCREEN_HEIGHT:
-        displacement_koeficient = (bg_image.get_height() - SCREEN_HEIGHT) / SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
-    else:
-        displacement_koeficient = (bg_image.get_width() - SCREEN_WIDTH) / SCREEN_WIDTH
-
-
-    if not opposite_dir:
-        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) - (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
-        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) - (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
-    else:
-        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) + (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
-        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) + (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
-
-    return (bg_pos[0], bg_pos[1])
+    rows = len(level_data)
+    cols = len(level_data[0]) if rows > 0 else 0
+    platforms = []
+    relative_offfsets = [ 
+        (-1, -1),   (0, -1),    (1, -1),
+        (-1, 0),                (1, 0),
+        (-1, 1),    (0, 1),     (1, 1)
+    ]
+    for row_index, row in enumerate(level_data):
+        for col_index, col in enumerate(row):
+            if col != 0:
+                neighbors = []
+                for relative_x, relative_y in relative_offfsets:
+                    offset_row, offset_col = row_index + relative_y, col_index + relative_x # dejanski offseti
+                    if (offset_row >= 0 and offset_row < rows) and (offset_col >= 0 and offset_col < cols):
+                        neighbors.append(level_data[offset_row][offset_col])
+                    else:
+                        neighbors.append(0)
+                platforms.append(Platform(col_index * tile_size, row_index * tile_size, tile_size, tile_size, autotile(neighbors)))
+    return platforms 
 
 def create_level_surface(level:object, tile_images:list):
     """Creates level surface by combining all platforms/tiles into one surface"""
@@ -357,6 +359,129 @@ def create_level_surface(level:object, tile_images:list):
 
     return level_surface
 
+def slice_level(last_level:list, tile_size:int, min_row_length:int):
+    """Slice given level into horizontal rows of tiles and return list of rows (which are lists of tiles)"""
+    level_rows = []
+    last_row_start_index = 0
+    row_length = 0
+
+    # We dont need to check the last (min_row_length - 1) tiles as they can't 
+    # have enough neighbours to form suitable platforms for babe to stand on
+    for i in range(len(last_level) - (min_row_length - 1)): 
+        if i - last_row_start_index < row_length: # If we already included that platform in previous row, we skip it this time
+            continue
+        
+        platform = last_level[i]
+        current_row = [platform]
+
+        # Then we check all following tiles
+        for j in range(i + 1, len(last_level)):
+            next_platform = last_level[j]
+            same_row = next_platform.rect.y == platform.rect.y and next_platform.rect.x - tile_size * (j - i) == platform.rect.x
+            last_tile = j == len(last_level) - 1
+
+            # If the tile is part of the current row, we add it to current row
+            if same_row:
+                current_row.append(next_platform)
+            
+            # If the tile is not part of the same row, or if it's the last tile, we finalize the row
+            if not same_row or last_tile:
+                last_row_start_index = i
+                row_length = len(current_row)
+                break
+                
+        level_rows.append(current_row)
+
+    return level_rows
+
+def find_valid_subrows(tiles:list, level_rows:list, platform_index:int, platform_area:pygame.rect.Rect, min_row_length:int):
+    is_colliding_with_any_platform = False
+    occupied_subrows = []
+    
+    # We check for colliding with all previous platforms
+    for testing_platform_index in range(platform_index):
+        test_tiles = level_rows[testing_platform_index]
+
+        # For each previous platform we create area, that the platform occupies
+        test_platform_area = pygame.rect.Rect(test_tiles[0].rect.x, test_tiles[0].rect.y, len(test_tiles) * tile_size, tile_size) # We create an area of platform
+        
+        # If the spaces collide we try searching for sub-area of the platform that is longer than min_row_length and not covered
+        if platform_area.colliderect(test_platform_area):
+            current_subrow = []
+
+            for tile_index in range(len(tiles)):
+                tile_pos = (tiles[tile_index].rect.x, tiles[tile_index].rect.y)
+                
+                # For each tile of the platform, we check all three tiles above it, 
+                # to see if any of those collides with current platform we are testing against
+                is_space_above_colliding = test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 2 * tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 3 * tile_size)
+
+                # If any of 3 above spaces is in the way, we add that tile to current_subrow of occupied tiles
+                if is_space_above_colliding:
+                    current_subrow.append(tiles[tile_index])
+
+                # If all 3 spaces above are free, that tile is free
+                # our current_subrow untill now should be added to occupied_subrows,
+                # and we should start over with current_subrows
+                else:
+                    if len(current_subrow) > 0:
+                        occupied_subrows.append(current_subrow)
+                    current_subrow = []
+            
+            # If we reach the last tile, we also need to check what we have got until now
+            if len(current_subrow) > 0:#= min_row_length:
+                occupied_subrows.append(current_subrow)
+    
+    valid_subrows = combine_subrows(occupied_subrows, tiles, min_row_length)
+
+    return valid_subrows
+    
+def combine_subrows(occupied_subrows: list, platform:list, min_row_length:int):
+    """Out of all occupied_subrows we project occupied tiles on initial platform, and then form valid subrows from this projection"""
+    valid_subrows = []
+    invalid_tiles = []
+    current_valid_subrow = []
+
+    #If there are no subrows of occupied platform tiles (platform is all good), we just return it
+    if not occupied_subrows:
+        return platform
+
+    # For each subrow of occupied_subrows (which there are)
+    for subrow in occupied_subrows:
+        # We check each tile against all platform_tiles
+        for subrow_tile in subrow:
+            for platform_tile in platform:
+                # If our occupied_subrow and platform tile have the same x coordinate, that means that this platform tile is invalid (occupied)
+                # If this platform tile is invalid, we add it to the list of ivalid tiles, but only if it hasn't occurred yet
+                if subrow_tile.rect.x == platform_tile.rect.x and invalid_tiles.count(platform_tile) == 0:
+                    invalid_tiles.append(platform_tile)
+
+    # For each platform tile we check if it appears in invalid_tiles
+    for platform_tile_index in range(len(platform)):
+        platform_tile = platform[platform_tile_index]
+        is_platform_tile_valid = True
+        for invalid_platform in invalid_tiles:
+            # If current_platform_tile appears in invalid_tiles, we add our current_valid_subrow to valid_subrows (if it's long enough), and start finding new current_valid_subrow
+            if platform_tile.rect.x == invalid_platform.rect.x:
+                is_platform_tile_valid = False
+                break
+        
+        if is_platform_tile_valid:
+            current_valid_subrow.append(platform_tile)
+        else:
+            if len(current_valid_subrow) >= min_row_length:
+                valid_subrows.append(current_valid_subrow)
+            current_valid_subrow = []
+        
+        # If we encounter the last tile, we also need to check whether we have suitable subrows!
+        if platform_tile_index == len(platform) - 1:
+            if len(current_valid_subrow) >= min_row_length:
+                valid_subrows.append(current_valid_subrow)
+            current_valid_subrow = []
+
+    return valid_subrows
+
+# LOADING GAME FILES
 def load_config(CAMPAIGN = ""):
     if CAMPAIGN:
         filepath = os.path.join(campaigns_folder, CAMPAIGN, "config.json")
