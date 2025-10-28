@@ -1,9 +1,9 @@
 import pygame, math
-from modules.config import colors
-from modules.pygame_objects import fonts, buttons
+import modules.config as conf
+import modules.pygame_objects as py_objs
 
 class Text:
-    def __init__(self:object, text: str, color: str, font: str, position: tuple[int, int]):
+    def __init__(self:object, text: str, color: str, font: str, position: tuple[int, int], center_position:bool = True):
         """
         Create a text object.
         Args:
@@ -11,13 +11,18 @@ class Text:
             color (str): The color key for text to use from the colors dictionary.
             font (str): The font key to use from the fonts dictionary.
             position (tuple[int, int]): Center position for the text.
+            center_position (bool): If given coordinates should be the position of the center of text. (Otherwise it's position of topleft corner).
         """
         self.text = text
-        self.color = colors[color]
+        self.color = conf.colors[color]
         self.font = font
         self.pos = position
-        self.surface = fonts[self.font].render(self.text, True, self.color)
-        self.rect = self.surface.get_rect(center = self.pos)
+        self.center_position = center_position
+        self.surface = py_objs.fonts[self.font].render(self.text, True, self.color)
+        if self.center_position:
+            self.rect = self.surface.get_rect(center = self.pos)
+        else:
+            self.rect = self.surface.get_rect(topleft = self.pos)
 
     def draw(self:object, screen:pygame.Surface):
         """Draws text on the screen"""
@@ -25,8 +30,7 @@ class Text:
 
     def update(self:object, max_width:int = 0, font:str = "notification"):
         """Updates text and re-renders its surface"""
-        self.surface = fonts[self.font].render(self.text, True, self.color)
-        self.rect = self.surface.get_rect(center = self.pos)
+        self.surface = py_objs.fonts[self.font].render(self.text, True, self.color)
         
         self.wrap(max_width, font)
 
@@ -34,7 +38,7 @@ class Text:
         lines = self.text.splitlines()
         rendered_lines = []
         for line in lines:
-            rendered_lines.append(fonts[self.font].render(line, True, self.color))
+            rendered_lines.append(py_objs.fonts[self.font].render(line, True, self.color))
 
         text_width, text_height = 0, 0
         for line in rendered_lines:
@@ -48,7 +52,10 @@ class Text:
             self.surface.blit(line, (0, y))
             y += line.get_height()
 
-        self.rect = self.surface.get_rect(center=self.pos)
+        if self.center_position:
+            self.rect = self.surface.get_rect(center = self.pos)
+        else:
+            self.rect = self.surface.get_rect(topleft = self.pos)
     
     def wrap(self:object, max_width:int = 0, font:str = "notification"):
         if max_width == 0:
@@ -57,14 +64,14 @@ class Text:
         words = self.text.split()
         self.text = words[0]
         current_line_width = 0
-        space_width = fonts[font].size(" ")[0]
+        space_width = py_objs.fonts[font].size(" ")[0]
         words
         for word in words[1:]:
-            word_width = fonts[font].size(word)[0]
+            word_width = py_objs.fonts[font].size(word)[0]
             if current_line_width + word_width + space_width <= max_width:
                 self.text = self.text + " " + word
                 lines = self.text.split("\n")
-                current_line_width = fonts[font].size(lines[len(lines) - 1])[0]
+                current_line_width = py_objs.fonts[font].size(lines[len(lines) - 1])[0]
             else:
                 self.text = self.text + "\n" + word
                 current_line_width = 0
@@ -83,7 +90,7 @@ class InputField:
     
     def draw(self:object, screen:pygame.Surface):
         """Draws input field on the screen"""
-        pygame.draw.rect(screen, colors[self.color], self.rect, 5, 25)
+        pygame.draw.rect(screen, conf.colors[self.color], self.rect, 5, 25)
 
     def capture_input(self:object, events:list, username_text:object, password_text:object):
         """Captures text from the input field and updates the corresponding text object"""
@@ -161,7 +168,7 @@ class Cursor:
             self.is_visible = True
 
         if self.can_draw and self.is_visible:
-            pygame.draw.rect(screen, colors["white"], self.rect)
+            pygame.draw.rect(screen, conf.colors["white"], self.rect)
     
     def update(self:object):
         """Updates cursors state and position"""
@@ -190,9 +197,9 @@ class Button:
     def draw(self:object, screen:pygame.Surface):
         """Draws the button based on its type"""
         if self.type == "play":
-            screen.blit(buttons[self.state], (self.rect.x, self.rect.y))
+            screen.blit(py_objs.buttons[self.state], (self.rect.x, self.rect.y))
         elif self.type == "quit" or self.type == "submit" or self.type == "logout":
-            screen.blit(buttons[self.state + 3], (self.rect.x, self.rect.y))
+            screen.blit(py_objs.buttons[self.state + 3], (self.rect.x, self.rect.y))
 
     def is_clicked(self:object):
         """Checks if button was pressed"""
@@ -265,7 +272,7 @@ class Notification:
         self.max_width = 700
         self.margin = 25
         self.is_visible = True
-        self.color = colors["grey_dark"]
+        self.color = conf.colors["grey_dark"]
         self.has_been_pressed = False
 
     def show_notification(self, message):
@@ -307,7 +314,119 @@ class Notification:
                 self.is_visible = False
                 return True
             return False
+
+class DropdownMenu: # Finish this (for dropdown menus!)
+    def __init__(self, pos_tuple: tuple[int, int], dimentions:tuple[int, int], items:list):
+        self.position = pos_tuple
+        self.dimentions = dimentions
+        self.items = items
+        self.items_texts = []
+        self.row_height = 50 # How high is each row
+        self.item_length_limit = 50
+        self.rect_border_width = 5
+        self.highlited_item = 0
+        self.rect = pygame.rect.Rect(self.position[0], self.position[1], self.dimentions[0], self.dimentions[1])
+        self.selection_rect = pygame.rect.Rect(self.position[0], self.position[1] + self.dimentions[1] - self.rect_border_width, self.dimentions[0], len(items) * self.row_height + 2 * self.rect_border_width)
+        self.highlited_rect = pygame.rect.Rect(self.position[0], self.position[1] + self.dimentions[1] + self.highlited_item * self.row_height, self.dimentions[0], self.row_height)
+        self.is_anything_highlited = True
+        self.is_focused = False
+        self.color = "grey_dark"
+        self.selected_item = ""
+        self.selection_text = "Select a campaign"
+        self.last_highlited_change_made_by = "" # For when we handle confirming selectio
+        self.items.sort()
+        self.create_texts()
+
+    def draw(self:object, screen:pygame.surface.Surface):
+        self.get_active()
+
+        #If the dropdown isn't focused, we draw all corners rounded, and don't display selection rectangle
+        if not self.is_focused:
+            pygame.draw.rect(screen, conf.colors[self.color], self.rect, self.rect_border_width, 25)
+            self.items_texts[0].draw(screen)
         
+        else:
+            pygame.draw.rect(screen, conf.colors[self.color], self.rect, self.rect_border_width, 0, 25, 25, 0, 0)
+            pygame.draw.rect(screen, conf.colors["grey_dark"], self.selection_rect, 0, 0, 0, 0, 25, 25)
+            if self.is_anything_highlited:
+                if self.highlited_item != len(self.items) - 1:
+                    pygame.draw.rect(screen, conf.colors["grey_middle"], self.highlited_rect)
+                else:
+                    pygame.draw.rect(screen, conf.colors["grey_middle"], self.highlited_rect, 0, 0, 0, 0, 25, 25)
+            pygame.draw.rect(screen, conf.colors[self.color], self.selection_rect, self.rect_border_width, 0, 0, 0, 25, 25)
+            for text in self.items_texts:
+                text.draw(screen)
+
+    def handle_highliting(self:object, events:list):
+        if not self.is_focused:
+            return
+        
+        mouse_moved = False
+        enter_pressed = False
+
+        # If we press arrow up or arrow down, we should move highlited_rect in the appropriate direction
+        for event in events:
+            if event.type == pygame.MOUSEMOTION:
+                mouse_moved = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    self.highlited_item += 1
+                    self.last_highlited_change_made_by = "keyboard"
+                elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                    self.highlited_item -= 1
+                    self.last_highlited_change_made_by = "keyboard"
+                elif event.key == pygame.K_RETURN:
+                    enter_pressed = True
+
+        # If we move mouse up or down, we should change highlited item! (if we are on top dropdown menu!)
+        mouse_pos = pygame.mouse.get_pos()
+        if self.selection_rect.collidepoint(mouse_pos) and mouse_moved:
+            if mouse_pos[1] < self.highlited_rect.top:
+                self.highlited_item -= 1
+            elif mouse_pos[1] > self.highlited_rect.bottom:
+                self.highlited_item += 1
+            self.last_highlited_change_made_by = "mouse"
+
+        # We make sure that index for highlited item is reasonable
+        if self.highlited_item >= len(self.items):
+            self.highlited_item = len(self.items) - 1
+        elif self.highlited_item < 0:
+            self.highlited_item = 0
+
+        self.highlited_rect.top = self.position[1] + self.dimentions[1] + self.highlited_item * self.row_height
+        self.handle_confirming_selection(pygame.mouse.get_pressed()[0], enter_pressed)
+
+    def handle_confirming_selection(self:object, mouse_down:bool, enter_pressed:bool):
+        if (self.last_highlited_change_made_by == "mouse" and mouse_down and self.highlited_rect.collidepoint(pygame.mouse.get_pos())) or (self.last_highlited_change_made_by == "keyboard" and enter_pressed):
+            self.selected_item = self.items[self.highlited_item]
+            self.is_focused = False
+            self.items_texts[0].text = self.selected_item
+            self.items_texts[0].update()
+
+    def get_active(self:object):
+        mouse_pos = pygame.mouse.get_pos()
+        if pygame.mouse.get_pressed()[0]:
+            if self.rect.collidepoint(mouse_pos):
+                self.color = "mint_dark"
+                self.is_focused = True
+
+            else:
+                self.color = "grey_dark"
+                self.is_focused = False
+
+    def create_texts(self:object):
+        """Create text objects for all the items in the dropdown."""
+        self.items_texts.append(Text("Select a campaign", "white", "bold", (self.position[0] + 15, self.position[1] + 25), False))
+
+        for i in range(len(self.items)):
+            self.items_texts.append(Text(self.items[i], "white", "bold", (self.position[0] + 10, self.position[1] + self.dimentions[1] + self.rect_border_width + self.row_height * i), False))
+
+    def get_selection(self:object):
+        return self.selected_item
+
+    def limit_item_length(self:object, limit:int): #naredi da ce je item predolg, na napise "name od the ite..."
+        pass
+
 class Slider:
     def __init__(self:object, max_value):
         self.max_value = max_value

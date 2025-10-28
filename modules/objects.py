@@ -1,44 +1,45 @@
-from modules.config import level_paths, SCREEN_HEIGHT, SCREEN_WIDTH, player_size, current_level, coordinates, sizes, title_text, campaigns_folder, CAMPAIGN
-from modules.player_controller import PlayerController
-from modules.npcs import BabeController
-from modules.utils import create_level, load_level_from_file, create_level_surface, detect_levels
-from modules.music_controller import MusicController
-from modules.ui import Text, Button, InputField, FadeManager, Cursor, Notification
-from modules.pygame_objects import tile_images
-
-level_paths = detect_levels(CAMPAIGN, campaigns_folder, level_paths)
+import modules.config as conf
+import modules.player_controller as player
+import modules.npcs as npcs
+import modules.utils as utils
+import modules.music as music
+import modules.ui as ui
+import modules.pygame_objects as py_objs
 
 levels, level_surfaces = [], []
-for i in range(len(level_paths)):
-    platforms = create_level(load_level_from_file(i))
-    levels.append(platforms)
-    level_surfaces.append(create_level_surface(platforms, tile_images))
+utils.detect_levels()
+utils.make_levels(py_objs.tile_images)
 
-player = PlayerController(SCREEN_WIDTH / 2 - player_size / 2, 891, player_size)
-main_babe = BabeController(1200, 160, player_size)
-level = levels[current_level]
+player = player.PlayerController(conf.SCREEN_WIDTH / 2 - conf.player_size / 2, 891, conf.player_size)
+main_babe = npcs.BabeController(1200, 160, conf.player_size)
+level = levels[conf.current_level]
 
-music = MusicController()
-effect = FadeManager(SCREEN_WIDTH, SCREEN_HEIGHT)
+game_music = music.MusicController()
+effect = ui.FadeManager(conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT)
 
-play_button = Button(coordinates["play_button"], sizes["play_button"], "play")
-quit_button = Button(coordinates["quit_button"], sizes["quit_button"], "quit")
-submit_button = Button(coordinates["submit_button"], sizes["submit_button"], "submit")
-logout_button = Button(coordinates["logout_button"], sizes["logout_button"], "logout")
+play_button = ui.Button(conf.coordinates["play_button"], conf.sizes["play_button"], "play")
+quit_button = ui.Button(conf.coordinates["quit_button"], conf.sizes["quit_button"], "quit")
+submit_button = ui.Button(conf.coordinates["submit_button"], conf.sizes["submit_button"], "submit")
+logout_button = ui.Button(conf.coordinates["logout_button"], conf.sizes["logout_button"], "logout")
 
-username_input = InputField(coordinates["username_input"], sizes["input"], False, "username")
-password_input = InputField(coordinates["password_input"], sizes["input"], True, "password")
+username_input = ui.InputField(conf.coordinates["username_input"], conf.sizes["input"], False, "username")
+password_input = ui.InputField(conf.coordinates["password_input"], conf.sizes["input"], True, "password")
 
-title = Text(title_text, "white", "title", ((SCREEN_WIDTH / 2), 200))
-play_text = Text("PLAY", "white", "normal", play_button.rect.center)
-quit_text = Text("QUIT", "white", "smaller", quit_button.rect.center)
-submit_text = Text("Submit", "white", "normal", submit_button.rect.center)
-logout_text = Text("Logout", "white", "normal", logout_button.rect.center)
-username_text = Text("username", "white", "smaller", username_input.rect.center)
-password_text = Text("password", "white", "smaller", password_input.rect.center)
-FPS_text = Text("000", "grey_dark", "timer", (SCREEN_WIDTH - 60,15))
-timer_text = Text("0:00:00", "grey_dark", "timer", (50, 15))
+title = ui.Text(conf.title_text, "white", "title", ((conf.SCREEN_WIDTH / 2), 200))
+play_text = ui.Text("PLAY", "white", "normal", play_button.rect.center)
+quit_text = ui.Text("QUIT", "white", "smaller", quit_button.rect.center)
+submit_text = ui.Text("Submit", "white", "normal", submit_button.rect.center)
+logout_text = ui.Text("Logout", "white", "normal", logout_button.rect.center)
+username_text = ui.Text("username", "white", "smaller", username_input.rect.center)
+password_text = ui.Text("password", "white", "smaller", password_input.rect.center)
+FPS_text = ui.Text("000", "grey_dark", "timer", (conf.SCREEN_WIDTH - 60,15))
+timer_text = ui.Text("0:00:00", "grey_dark", "timer", (50, 15))
 
-cursor = Cursor((0, 0), (4, 36))
+cursor = ui.Cursor((0, 0), (4, 36))
 
-notification = Notification(((SCREEN_WIDTH / 2) - 300, 800), (600, 150), "{Notification message}")
+notification = ui.Notification(((conf.SCREEN_WIDTH / 2) - 300, 800), (600, 150), "{Notification message}")
+
+# We input all possible options to choose from when we define a dropdown menu
+path, campaigns_list, files = utils.list_current_folder(conf.campaigns_folder) # We don't actually need path and files, it's just because the function returns those
+campaigns_list.remove("levels")
+campaign_dropdown = ui.DropdownMenu(conf.coordinates["campaigns_dropdown"], conf.sizes["campaigns_dropdown"], campaigns_list)

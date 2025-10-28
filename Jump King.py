@@ -1,307 +1,316 @@
 import pygame, sys, math, os
 
-from modules.config import *
-from modules.objects import *
-from modules.pygame_objects import *
-from modules.utils import log_in, draw_scene, load_player_stats, save_player_stats, load_resources
+import modules.config as conf
+import modules.objects as objs
+import modules.pygame_objects as py_objs
+import modules.utils as utils
 
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Jump King")
-pygame.display.set_icon(pygame.image.load(os.path.join(fallback_resources_folder, "other", "icon.png")))
-VOLUME_MASTER = def_stats["volume_master"]
-VOLUME_SFX = def_stats["volume_sfx"]
-VOLUME_MUSIC = def_stats["volume_music"]
-music.set_volume(sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
+pygame.display.set_icon(pygame.image.load(os.path.join(conf.fallback_resources_folder, "other", "icon.png")))
+VOLUME_MASTER = conf.def_stats["volume_master"]
+VOLUME_SFX = conf.def_stats["volume_sfx"]
+VOLUME_MUSIC = conf.def_stats["volume_music"]
+objs.game_music.set_volume(py_objs.sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
 
-while WINDOW_OPEN:
-    current_menu = "login"
-    music.play_menu(current_menu)
+while conf.WINDOW_OPEN:
+    conf.current_menu = "login"
+    objs.game_music.play_menu(conf.current_menu)
 
-    screen.blit(ui_bgs["login"], (-600, 0))
-    submit_button_already_clicked = False
-    notification.delete_notification()
-    faded_in = False
+    py_objs.screen.blit(py_objs.ui_bgs["login"], (-600, 0))
+    conf.submit_button_already_clicked = False
+    conf.quit_button_already_clicked = False
+    objs.notification.delete_notification()
+    conf.faded_in = False
 
-    clock.tick()
-    while LOGIN:
+    py_objs.clock.tick()
+    while conf.LOGIN:
         # If we havent already started fade-in (first frame) we start fade-in
-        if not faded_in:
-            effect.start_fade_in()
-            faded_in = True
+        if not conf.faded_in:
+            objs.effect.start_fade_in()
+            conf.faded_in = True
 
-        delta_time = clock.tick(FPS_cap_menus) / 1000.0
-        time_spent += delta_time
+        delta_time = py_objs.clock.tick(conf.FPS_cap_menus) / 1000.0
+        conf.time_spent += delta_time
         events = pygame.event.get()
 
         # If we close the window
         for event in events:
             if event.type == pygame.QUIT:
-                effect.start_fade_out()
-                next_scene = "quit"
-                music.play_fadeout()
+                objs.effect.start_fade_out()
+                conf.next_scene = "quit"
+                objs.game_music.play_fadeout()
 
-        username_input.capture_input(events, username_text, password_text)
-        password_input.capture_input(events, username_text, password_text)
-        cursor.update()
+        objs.username_input.capture_input(events, objs.username_text, objs.password_text)
+        objs.password_input.capture_input(events, objs.username_text, objs.password_text)
+        objs.cursor.update()
+        objs.campaign_dropdown.handle_highliting(events)
 
-        if submit_button.is_clicked():
-            if not submit_button_already_clicked:
-                sfx["click"].play()
+        if objs.submit_button.is_clicked():
+            if not conf.submit_button_already_clicked:
+                py_objs.sfx["click"].play()
 
             # We only want transition if music is different for login and main menu
-            if music_menus_instructions["login"] != music_menus_instructions["main_menu"]:
-                music.play_fadeout()
-            submit_button_already_clicked = True
-            PLAYER_NAME = username_input.input_text
-            next_scene = log_in(username_input.input_text, password_input.input_text, title, effect, username_input, password_input, username_text, password_text, stats)
+            if py_objs.music_menus_instructions["login"] != py_objs.music_menus_instructions["main_menu"]:
+                objs.game_music.play_fadeout()
+            conf.submit_button_already_clicked = True
+            conf.PLAYER_NAME = objs.username_input.input_text
+            conf.next_scene = utils.log_in(objs.username_input.input_text, objs.password_input.input_text, objs.title, objs.effect, objs.username_input, objs.password_input, objs.username_text, objs.password_text, conf.stats)
+            conf.CAMPAIGN = objs.campaign_dropdown.get_selection()
 
-        if quit_button.is_clicked():
-            if not quit_button_already_clicked:
-                sfx["click"].play()
-            effect.start_fade_out()
-            music.play_fadeout()
-            next_scene = "quit"
-            quit_button_already_clicked = True
+        if objs.quit_button.is_clicked():
+            if not conf.quit_button_already_clicked:
+                py_objs.sfx["click"].play()
+            objs.effect.start_fade_out()
+            objs.game_music.play_fadeout()
+            conf.next_scene = "quit"
+            conf.quit_button_already_clicked = True
 
-        draw_scene("login", screen, scaled_bgs, ui_bgs, 0, delta_time)
-        effect.update(delta_time, screen)
+        utils.draw_scene("login", py_objs.screen, py_objs.scaled_bgs, py_objs.ui_bgs, 0, delta_time)
+        objs.effect.update(delta_time, py_objs.screen)
 
-        if next_scene == "main_menu" and not effect.get_active():
-            MAIN_MENU = True
-            LOGIN = False
+        if conf.next_scene == "main_menu" and not objs.effect.get_active():
+            conf.MAIN_MENU = True
+            conf.LOGIN = False
 
-        if next_scene == "quit" and not effect.get_active():
-            LOGIN = False
-            WINDOW_OPEN = False
-            QUITTING_GAME = True
+        if conf.next_scene == "quit" and not objs.effect.get_active():
+            conf.LOGIN = False
+            conf.WINDOW_OPEN = False
+            conf.QUITTING_GAME = True
 
         pygame.display.flip()
 
-    if not loaded_player_stats:
-        load_player_stats(PLAYER_NAME, stats)
-        music.update_volume(stats)
+    if not conf.loaded_player_stats:
+        utils.load_player_stats(conf.PLAYER_NAME, conf.stats)
+        objs.game_music.update_volume(conf.stats)
 
-    faded_in = False
-    play_button_already_clicked = False
-    quit_button_already_clicked = False
-    logout_button_already_clicked = False
+    conf.faded_in = False
+    conf.play_button_already_clicked = False
+    conf.quit_button_already_clicked = False
+    conf.logout_button_already_clicked = False
 
-    notification.delete_notification()
-    current_menu = "main_menu"
-    music.play_menu(current_menu)
+    objs.notification.delete_notification()
+    conf.current_menu = "main_menu"
+    objs.game_music.play_menu(conf.current_menu)
 
-    while MAIN_MENU:
-        delta_time = clock.tick(FPS_cap_menus) / 1000.0
-        time_spent += delta_time
+    if not conf.QUITTING_GAME:
+        py_objs.tile_images, py_objs.player_images, py_objs.babe_images, py_objs.buttons, py_objs.scaled_bgs, py_objs.ui_bgs, py_objs.sfx, py_objs.fonts = utils.load_resources()
 
-        if not faded_in:
-            effect.start_fade_in()
-            faded_in = True
+    py_objs.clock.tick()
+
+    while conf.MAIN_MENU:
+        delta_time = py_objs.clock.tick(conf.FPS_cap_menus) / 1000.0
+        conf.time_spent += delta_time
+
+        if not conf.faded_in:
+            objs.effect.start_fade_in()
+            conf.faded_in = True
 
         # If we close the window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                save_player_stats(PLAYER_NAME, stats)
-                effect.start_fade_out()
-                music.play_fadeout()
-                next_scene = "quit"
+                utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
+                objs.effect.start_fade_out()
+                objs.game_music.play_fadeout()
+                conf.next_scene = "quit"
 
-        if play_button.is_clicked():
-            if not play_button_already_clicked:
-                sfx["click"].play()
-            music.play_fadeout()
-            effect.start_fade_out()
-            next_scene = "running"
-            play_button_already_clicked = True
-            stats["games_started"] += 1
+        if objs.play_button.is_clicked():
+            if not conf.play_button_already_clicked:
+                py_objs.sfx["click"].play()
+            objs.game_music.play_fadeout()
+            objs.effect.start_fade_out()
+            conf.next_scene = "running"
+            conf.play_button_already_clicked = True
+            conf.stats["games_started"] += 1
 
-        if quit_button.is_clicked():
-            if not quit_button_already_clicked:
-                sfx["click"].play()
-            music.play_fadeout()
-            effect.start_fade_out()
-            next_scene = "quit"
-            quit_button_already_clicked = True
+        if objs.quit_button.is_clicked():
+            if not conf.quit_button_already_clicked:
+                py_objs.sfx["click"].play()
+            objs.game_music.play_fadeout()
+            objs.effect.start_fade_out()
+            conf.next_scene = "quit"
+            conf.quit_button_already_clicked = True
 
-        if logout_button.is_clicked():
-            if not logout_button_already_clicked:
-                sfx["click"].play()
+        if objs.logout_button.is_clicked():
+            if not conf.logout_button_already_clicked:
+                py_objs.sfx["click"].play()
 
             # We only want transition if music is different for login and main menu
-            if music_menus_instructions["login"] != music_menus_instructions["main_menu"]:
-                music.play_fadeout()
-            next_scene = "login"
-            effect.start_fade_out()
-            logout_button_already_clicked = True
-            username_input.input_text = ""
-            password_input.input_text = ""
-            password_input.masked_text = ""
-            username_text.text = ""
-            password_text.text = ""
-            username_text.update()
-            password_text.update()
+            if py_objs.music_menus_instructions["login"] != py_objs.music_menus_instructions["main_menu"]:
+                objs.game_music.play_fadeout()
+            conf.next_scene = "login"
+            objs.effect.start_fade_out()
+            conf.logout_button_already_clicked = True
+            objs.username_input.input_text = ""
+            objs.password_input.input_text = ""
+            objs.password_input.masked_text = ""
+            objs.username_text.text = ""
+            objs.password_text.text = ""
+            objs.username_text.update()
+            objs.password_text.update()
 
-        draw_scene("main_menu", screen, scaled_bgs, ui_bgs)
-        effect.update(delta_time, screen)
+        utils.draw_scene("main_menu", py_objs.screen, py_objs.scaled_bgs, py_objs.ui_bgs)
+        objs.effect.update(delta_time, py_objs.screen)
 
-        if next_scene == "running" and not effect.get_active():
-            MAIN_MENU = False
-            GAME_RUNNING = True
+        if conf.next_scene == "running" and not objs.effect.get_active():
+            conf.MAIN_MENU = False
+            conf.GAME_RUNNING = True
 
-        if next_scene == "quit" and not effect.get_active():
-            MAIN_MENU = False
-            WINDOW_OPEN = False
-            QUITTING_GAME = True
+        if conf.next_scene == "quit" and not objs.effect.get_active():
+            conf.MAIN_MENU = False
+            conf.WINDOW_OPEN = False
+            conf.QUITTING_GAME = True
 
-        if next_scene == "login" and not effect.get_active():
-            LOGIN = True
-            MAIN_MENU = False
-            save_player_stats(PLAYER_NAME, stats)
+        if conf.next_scene == "login" and not objs.effect.get_active():
+            conf.LOGIN = True
+            conf.MAIN_MENU = False
+            utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
 
         pygame.display.flip()
 
-    if next_scene != "login":
+    if conf.next_scene != "login":
         pygame.mixer.music.stop()
-        music.play_level(current_level)
+        objs.game_music.play_level(conf.current_level)
 
-    current_level = 0
-    level = levels[current_level]
-    faded_in = False
-    game_ended = False
+    conf.current_level = 0
+    objs.level = objs.levels[conf.current_level]
+    conf.faded_in = False
+    conf.game_ended = False
 
-    player.reset_position(SCREEN_WIDTH / 2 - player_size / 2, 891)
-    player.reset_values()
+    objs.player.reset_position(conf.SCREEN_WIDTH / 2 - conf.player_size / 2, 891)
+    objs.player.reset_values()
 
-    notification.delete_notification()
+    objs.notification.delete_notification()
     start_time = pygame.time.get_ticks()
-    can_play_music = True
+    conf.can_play_music = True
 
 
-    if not QUITTING_GAME:
-        load_resources(CAMPAIGN) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
-        main_babe.find_position(babe_position, levels[len(levels) - 1], tile_size, SCREEN_WIDTH, SCREEN_HEIGHT) # Find babe position based on config file or automatically
-    clock.tick()
+    if not conf.QUITTING_GAME:
+        # That's commented out just because for now we set campaign on the login screen
+        #py_objs.tile_images, py_objs.player_images, py_objs.babe_images, py_objs.buttons, py_objs.scaled_bgs, py_objs.ui_bgs, py_objs.sfx, py_objs.fonts = utils.load_resources(conf.CAMPAIGN, conf.fallback_resources_folder, conf.tile_images_paths, conf.player_images_paths, conf.babe_images_paths, conf.button_images_paths, conf.button_load_sizes, conf.bg_resize_koeficient, conf.sfx_keys, conf.fonts_keys, conf.fonts_sizes, conf.fonts_names, conf.ui_bgs_sizes, py_objs.ui_bgs_images_paths, py_objs.bgs_images_paths) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
+        objs.main_babe.find_position(py_objs.babe_position, objs.levels[len(objs.levels) - 1], conf.tile_size, conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT) # Find babe position based on config file or automatically
+    py_objs.clock.tick()
 
-    while GAME_RUNNING:
-        if not faded_in:
-            effect.start_fade_in()
-            faded_in = True
-        delta_time = clock.tick(FPS_cap_game) / 1000.0
-        time_spent += delta_time
+    while conf.GAME_RUNNING:
+        if not conf.faded_in:
+            objs.effect.start_fade_in()
+            conf.faded_in = True
+        delta_time = py_objs.clock.tick(conf.FPS_cap_game) / 1000.0
+        conf.time_spent += delta_time
         time = pygame.time.get_ticks() - start_time
         keys = pygame.key.get_pressed()
 
         hours = int(time // 3600000)
         minutes = int(time // 60000) % 60
         seconds = int(time // 1000) % 60
-        timer_text.text = f"{hours}:{minutes:02}:{seconds:02}"
-        timer_text.update()
+        objs.timer_text.text = f"{hours}:{minutes:02}:{seconds:02}"
+        objs.timer_text.update()
 
-        if time_spent > 0.5:
-            FPS_text.text = f"FPS: {math.floor(1 / delta_time):03}"
-            FPS_text.update()
-            time_spent = 0
+        if conf.time_spent > 0.5:
+            objs.FPS_text.text = f"FPS: {math.floor(1 / delta_time):03}"
+            objs.FPS_text.update()
+            conf.time_spent = 0
 
-        if player.can_move:
-            level, current_level = player.move(delta_time, keys, current_level, level, levels)
+        if objs.player.can_move:
+            objs.level, conf.current_level = objs.player.move(delta_time, keys)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                stats["ragequits"] += 1
-                save_player_stats(PLAYER_NAME, stats)
-                music.play_fadeout()
-                effect.start_fade_out()
-                next_scene = "quit"
+                conf.stats["ragequits"] += 1
+                utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
+                objs.game_music.play_fadeout()
+                objs.effect.start_fade_out()
+                conf.next_scene = "quit"
 
-        if main_babe.check_for_ending(player) and not game_ended:
-            next_scene = "endscreen"
-            effect.start_fade_out()
-            stats["games_played"] += 1
-            player.can_move = False
-            player.rect.y = main_babe.rect.y + 10
-            player.rect.x = main_babe.rect.x - 80
-            player.current_frame = 0
-            player.direction = "right"
-            music.play_fadeout()
-            can_play_music = False
+        if objs.main_babe.check_for_ending(objs.player) and not conf.game_ended:
+            conf.next_scene = "endscreen"
+            objs.effect.start_fade_out()
+            conf.stats["games_played"] += 1
+            objs.player.can_move = False
+            objs.player.rect.y = objs.main_babe.rect.y + 10
+            objs.player.rect.x = objs.main_babe.rect.x - 80
+            objs.player.current_frame = 0
+            objs.player.direction = "right"
+            objs.game_music.play_fadeout()
+            conf.can_play_music = False
 
-        if can_play_music:
-            music.play_level(current_level)
+        if conf.can_play_music:
+            objs.game_music.play_level(conf.current_level)
 
-        if next_scene == "endscreen" and not effect.get_active():
-            can_play_music = False
-            ENDSCREEN = True
-            GAME_RUNNING = False
-            game_ended = True
+        if conf.next_scene == "endscreen" and not objs.effect.get_active():
+            conf.can_play_music = False
+            conf.ENDSCREEN = True
+            conf.GAME_RUNNING = False
+            conf.game_ended = True
 
-        if next_scene == "quit" and not effect.get_active():
-            GAME_RUNNING = False
-            WINDOW_OPEN = False
-            ENDSCREEN = False
-            QUITTING_GAME = True
-            game_ended = True
+        if conf.next_scene == "quit" and not objs.effect.get_active():
+            conf.GAME_RUNNING = False
+            conf.WINDOW_OPEN = False
+            conf.ENDSCREEN = False
+            conf.QUITTING_GAME = True
+            conf.game_ended = True
 
-        if not game_ended:
-            draw_scene("running", screen, scaled_bgs, ui_bgs, current_level, delta_time)
+        if not conf.game_ended:
+            utils.draw_scene("running", py_objs.screen, py_objs.scaled_bgs, py_objs.ui_bgs, conf.current_level, delta_time)
 
-        effect.update(delta_time, screen)
+        objs.effect.update(delta_time, py_objs.screen)
         pygame.display.flip()
 
-    faded_in = False
+    conf.faded_in = False
 
     # To ensure music keeps playing uninterrupted between login and main menu
-    if next_scene != "login":
+    if conf.next_scene != "login":
         pygame.mixer.music.stop()
-        current_menu = "endscreen"
-    music.play_menu(current_menu)
+        conf.current_menu = "endscreen"
+    objs.game_music.play_menu(conf.current_menu)
 
-    notification.delete_notification()
-    notification.show_notification(messages["endscreen"])
+    objs.notification.delete_notification()
+    objs.notification.show_notification(conf.messages["endscreen"])
 
-    while ENDSCREEN:
-        delta_time = clock.tick(FPS_cap_menus) / 1000.0
-        time_spent += delta_time
+    while conf.ENDSCREEN:
+        delta_time = py_objs.clock.tick(conf.FPS_cap_menus) / 1000.0
+        conf.time_spent += delta_time
 
-        if not faded_in:
-            effect.start_fade_in()
-            faded_in = True
+        if not conf.faded_in:
+            objs.effect.start_fade_in()
+            conf.faded_in = True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                effect.start_fade_out()
-                music.play_fadeout()
-                next_scene = "quit"
+                objs.effect.start_fade_out()
+                objs.game_music.play_fadeout()
+                conf.next_scene = "quit"
 
         keys = pygame.key.get_pressed()
 
-        notification.is_clicked()
+        objs.notification.is_clicked()
 
-        if next_scene == "endscreen" or ((next_scene == "main_menu" or next_scene == "quit") and effect.get_active()):
-            draw_scene("endscreen", screen, scaled_bgs, ui_bgs)
+        if conf.next_scene == "endscreen" or ((conf.next_scene == "main_menu" or conf.next_scene == "quit") and objs.effect.get_active()):
+            utils.draw_scene("endscreen", py_objs.screen, py_objs.scaled_bgs, py_objs.ui_bgs)
 
-        if waiting_for_release:
+        if conf.waiting_for_release:
             if not any(keys):
-                waiting_for_release = False
+                conf.waiting_for_release = False
         elif any(keys):
-            music.play_fadeout()
-            effect.start_fade_out()
-            next_scene = "main_menu"
+            objs.game_music.play_fadeout()
+            objs.effect.start_fade_out()
+            conf.next_scene = "main_menu"
 
-        if next_scene == "main_menu" and not effect.get_active():
-            save_player_stats(PLAYER_NAME, stats)
-            ENDSCREEN = False
-            MAIN_MENU = True
-            faded_in = False
-            GAME_RUNNING = False
+        if conf.next_scene == "main_menu" and not objs.effect.get_active():
+            utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
+            conf.ENDSCREEN = False
+            conf.MAIN_MENU = True
+            conf.faded_in = False
+            conf.GAME_RUNNING = False
 
-        if next_scene == "quit" and not effect.get_active():
-            WINDOW_OPEN = False
-            MAIN_MENU = False
-            ENDSCREEN = False
-            QUITTING_GAME = True
+        if conf.next_scene == "quit" and not objs.effect.get_active():
+            conf.WINDOW_OPEN = False
+            conf.MAIN_MENU = False
+            conf.ENDSCREEN = False
+            conf.QUITTING_GAME = True
 
-        effect.update(delta_time, screen)
+        objs.effect.update(delta_time, py_objs.screen)
         pygame.display.flip()
 
 pygame.mixer.music.stop()

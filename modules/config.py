@@ -21,7 +21,6 @@ game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "fall_distance": 0,
 }
 stats = {}
-
 # All-time, preferences, (per-user)
 def_stats = {
     "password": 0,                              #DONE
@@ -112,6 +111,7 @@ sizes = {
     "submit_button": (210, 84),
     "logout_button": (210, 84),
     "input": (420, 84), 
+    "campaigns_dropdown": (420, 84),
 }
 coordinates = {
     "play_button": ((SCREEN_WIDTH / 2) - (sizes["play_button"][0] / 2), (SCREEN_HEIGHT / 2) - (sizes["play_button"][1] / 2)),
@@ -119,19 +119,21 @@ coordinates = {
     "submit_button": (((SCREEN_WIDTH / 2) - (sizes["submit_button"][0] / 2)), ((SCREEN_HEIGHT / 2) + 150)), 
     "logout_button": (((SCREEN_WIDTH / 2) - (sizes["logout_button"][0] / 2)), ((SCREEN_HEIGHT / 2) + 150)),
     "username_input": (((SCREEN_WIDTH / 2) - (sizes["input"][0] / 2)), ((SCREEN_HEIGHT / 2) - 150)), 
-    "password_input": (((SCREEN_WIDTH / 2) - (sizes["input"][0] / 2)), ((SCREEN_HEIGHT / 2) - 50))
+    "password_input": (((SCREEN_WIDTH / 2) - (sizes["input"][0] / 2)), ((SCREEN_HEIGHT / 2) - 50)),
+    "campaigns_dropdown": (((SCREEN_WIDTH / 2) - sizes["campaigns_dropdown"][0] / 2), ((SCREEN_HEIGHT / 2) - 300))
 }
 colors = {
     "black": (0, 0, 0),                 #crna
+    "grey_dark": (75, 75, 75),          #TEMNO siva
+    "grey_middle": (100, 100, 100),
+    "grey_bright": (200, 200, 200),     #svetlo siva
     "white": (255, 255, 255),           #bela
     "mint_dark": (95, 210, 115),        #TEMNA mint zelena
     "yellow_bright": (255, 255, 0),     #SVETLO rumena
     "blue_bright": (0, 180, 255),       #bolj svetlo modra
-    "grey_bright": (200, 200, 200),     #svetlo siva
     "orange": (255, 130, 0),            #oranzna
     "green": (0, 255, 0),               #zelena
     "pink": (255, 0, 255),              #pinky
-    "grey_dark": (75, 75, 75),          #TEMNO siva
     "red": (255, 0, 0),                 #SVETLA rdeca
     "mint_bright": (115, 255, 140),     #SVETLA mint zelena
     "red_dark": (180, 0, 0),            #TEMNA rdeca

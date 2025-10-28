@@ -1,8 +1,7 @@
 import pygame
 
-#import modules.objects as objects
-from modules.pygame_objects import sfx, music_level_instructions, music_menus_instructions
-from modules.config import musics, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC
+import modules.pygame_objects as py_objs
+import modules.config as conf
 
 class MusicController:
     def __init__(self:object):
@@ -20,17 +19,17 @@ class MusicController:
 
     def update_volume(self:object, stats:list):
         """Sets volume variables to values from the player's stats"""
-        global VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC, sfx
-        VOLUME_MASTER = stats["volume_master"]
-        VOLUME_SFX = stats["volume_sfx"]
-        VOLUME_MUSIC = stats["volume_music"]
-        self.set_volume(sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
+        import modules.config as conf
+        conf.VOLUME_MASTER = stats["volume_master"]
+        conf.VOLUME_SFX = stats["volume_sfx"]
+        conf.VOLUME_MUSIC = stats["volume_music"]
+        self.set_volume(py_objs.sfx, conf.VOLUME_MASTER, conf.VOLUME_SFX, conf.VOLUME_MUSIC)
 
     def play_level(self:object, current_level:int):
         """Plays the correct song based on the input"""     
 
-        if music_level_instructions:
-            self.requested_song = music_level_instructions[current_level]
+        if py_objs.music_level_instructions:
+            self.requested_song = py_objs.music_level_instructions[current_level]
         else:
             self.requested_song == ""
 
@@ -39,7 +38,7 @@ class MusicController:
 
         elif self.current_song != self.requested_song:
             self.current_song = self.requested_song
-            pygame.mixer.music.load(musics[self.current_song])
+            pygame.mixer.music.load(conf.musics[self.current_song])
             pygame.mixer.music.play(-1, 0, 500)
 
     def play_fadeout(self:object):
@@ -47,7 +46,7 @@ class MusicController:
         if not pygame.mixer.music.get_busy():
             self.is_fading_out = False
         if not self.is_fading_out:
-            self.set_volume(sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
+            self.set_volume(py_objs.sfx, conf.VOLUME_MASTER, conf.VOLUME_SFX, conf.VOLUME_MUSIC)
             
         self.is_fading_out = True
         pygame.mixer.music.fadeout(self.fade_duration)
@@ -56,9 +55,9 @@ class MusicController:
     def play_menu(self:object, current_menu:str):
         """Plays the main menu music"""
 
-        self.requested_song = music_menus_instructions[current_menu]
+        self.requested_song = py_objs.music_menus_instructions[current_menu]
 
         if self.current_song != self.requested_song:
-            pygame.mixer.music.load(musics[self.requested_song])
+            pygame.mixer.music.load(conf.musics[self.requested_song])
             pygame.mixer.music.play(-1)
             self.current_song = self.requested_song

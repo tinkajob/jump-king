@@ -1,8 +1,9 @@
 import os, json, hashlib, pygame
 
-from modules.config import level_paths, tile_size, stats_folder, def_stats, game_stats, SCREEN_HEIGHT, SCREEN_WIDTH, campaigns_folder, messages
-from modules.platform import Platform
-import modules.objects as objects
+import modules.platform as platform
+import modules.pygame_objects as py_objs
+import modules.objects as objs
+import modules.config as conf
 
 #MISCELANEOUS
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, username_text:str, password_text:str, stats:list):
@@ -151,18 +152,17 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
     """Returns tuple containing positions for images to offset background"""
     
     bg_pos = [0, 0]
-    if bg_image.get_width() / SCREEN_WIDTH > bg_image.get_height() / SCREEN_HEIGHT:
-        displacement_koeficient = (bg_image.get_height() - SCREEN_HEIGHT) / SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
+    if bg_image.get_width() / conf.SCREEN_WIDTH > bg_image.get_height() / conf.SCREEN_HEIGHT:
+        displacement_koeficient = (bg_image.get_height() - conf.SCREEN_HEIGHT) / conf.SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
     else:
-        displacement_koeficient = (bg_image.get_width() - SCREEN_WIDTH) / SCREEN_WIDTH
-
+        displacement_koeficient = (bg_image.get_width() - conf.SCREEN_WIDTH) / conf.SCREEN_WIDTH
 
     if not opposite_dir:
-        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) - (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
-        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) - (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
+        bg_pos[0] = (((bg_image.get_width() - conf.SCREEN_WIDTH) // 2) * -1) - (((conf.SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
+        bg_pos[1] = (((bg_image.get_height() - conf.SCREEN_HEIGHT) // 2) * -1) - (((conf.SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
     else:
-        bg_pos[0] = (((bg_image.get_width() - SCREEN_WIDTH) // 2) * -1) + (((SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
-        bg_pos[1] = (((bg_image.get_height() - SCREEN_HEIGHT) // 2) * -1) + (((SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
+        bg_pos[0] = (((bg_image.get_width() - conf.SCREEN_WIDTH) // 2) * -1) + (((conf.SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
+        bg_pos[1] = (((bg_image.get_height() - conf.SCREEN_HEIGHT) // 2) * -1) + (((conf.SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
 
     return (bg_pos[0], bg_pos[1])
 
@@ -171,51 +171,52 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
 
     if scene == "main_menu":
         screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, (-300, 0)))
-        objects.play_button.draw(screen)
-        objects.quit_button.draw(screen)
-        objects.logout_button.draw(screen)
-        objects.title.draw(screen)
-        objects.play_text.draw(screen)
-        objects.quit_text.draw(screen)
-        objects.logout_text.draw(screen)
-        objects.notification.draw(screen)
+        objs.play_button.draw(screen)
+        objs.quit_button.draw(screen)
+        objs.logout_button.draw(screen)
+        objs.title.draw(screen)
+        objs.play_text.draw(screen)
+        objs.quit_text.draw(screen)
+        objs.logout_text.draw(screen)
+        objs.notification.draw(screen)
 
     elif scene == "running":
-        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objects.player.get_center_pos(), scaled_bgs[current_level]))
-        screen.blit(objects.level_surfaces[current_level], (0, 0))
-        objects.player.draw(screen)
-        objects.main_babe.draw(screen, current_level, delta_time)
-        objects.timer_text.draw(screen)
-        objects.FPS_text.draw(screen)
-        objects.notification.draw(screen)
+        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objs.player.get_center_pos(), scaled_bgs[current_level]))
+        screen.blit(objs.level_surfaces[current_level], (0, 0))
+        objs.player.draw(screen)
+        objs.main_babe.draw(screen, current_level, delta_time)
+        objs.timer_text.draw(screen)
+        objs.FPS_text.draw(screen)
+        objs.notification.draw(screen)
     
     elif scene == "endscreen":
         screen.blit(ui_bgs["endscreen"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["endscreen"], False))
-        objects.notification.draw(screen)
+        objs.notification.draw(screen)
 
     elif scene == "login":
         screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, (-300, 0))) #(-600, 0)
-        objects.submit_button.draw(screen)
-        objects.quit_button.draw(screen)
-        objects.username_input.draw(screen)
-        objects.password_input.draw(screen)
-        objects.submit_text.draw(screen)
-        objects.quit_text.draw(screen)
-        objects.username_text.draw(screen)
-        objects.password_text.draw(screen)
-        objects.cursor.draw(screen, delta_time)
-        objects.notification.draw(screen)
+        objs.submit_button.draw(screen)
+        objs.quit_button.draw(screen)
+        objs.username_input.draw(screen)
+        objs.password_input.draw(screen)
+        objs.submit_text.draw(screen)
+        objs.quit_text.draw(screen) # Za ta tekst naredi da se narise ze ku poklices button funkcijo (da je kar part od buttona)
+        objs.username_text.draw(screen)
+        objs.password_text.draw(screen)
+        objs.cursor.draw(screen, delta_time)
+        objs.campaign_dropdown.draw(screen)
+        objs.notification.draw(screen)
 
 # MANAGING PLAYER STATS
 def save_player_stats(PLAYER_NAME:str, stats:list):
     """Saves player stats to its corresponding file"""
-    os.makedirs(stats_folder, exist_ok=True)
+    os.makedirs(conf.stats_folder, exist_ok=True)
     update_player_stats(stats)
 
     if PLAYER_NAME != "":
-        filepath = os.path.join(stats_folder, f"{PLAYER_NAME}_stats.json")
+        filepath = os.path.join(conf.stats_folder, f"{PLAYER_NAME}_stats.json")
     else:
-        filepath = os.path.join(stats_folder, "guest_stats.json")
+        filepath = os.path.join(conf.stats_folder, "guest_stats.json")
     
     with open(filepath, "w") as file:
         json.dump(stats, file, indent = 4)
@@ -223,9 +224,9 @@ def save_player_stats(PLAYER_NAME:str, stats:list):
 def load_player_stats(PLAYER_NAME:str, stats:list):
     """Loads player stats from its corresponding file"""
     if PLAYER_NAME != "":
-        filepath = os.path.join(stats_folder, f"{PLAYER_NAME}_stats.json")
+        filepath = os.path.join(conf.stats_folder, f"{PLAYER_NAME}_stats.json")
     else:
-        filepath = os.path.join(stats_folder, "guest_stats.json")
+        filepath = os.path.join(conf.stats_folder, "guest_stats.json")
 
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
@@ -235,10 +236,10 @@ def load_player_stats(PLAYER_NAME:str, stats:list):
     else:
         # If the player's stats file doesn't exist (new player)
         for stat in stats:
-            stats[stat] = def_stats[stat]
+            stats[stat] = conf.def_stats[stat]
     
     #ce trenutno v stats.json ni neke vrednosti (smo na novo uvedli/ponesreci zbrisana), jo nastavimo na fallback vrednost
-    for key, value in def_stats.items():
+    for key, value in conf.def_stats.items():
         if key not in stats:
             stats[key] = value
 
@@ -251,32 +252,41 @@ def wipe_stats(PLAYER_NAME:str, stats:list, def_stats:list):
 def update_player_stats(stats:list):
     """Updates player stats based on stats from his last game"""
     #tle do pravila za use statse kku se jih zdruzuje
-    stats["total_jumps"] += game_stats["jumps"]
-    if stats["min_jumps_in_game"] > game_stats["jumps"]:
-        stats["min_jumps_in_game"] = game_stats["jumps"]
-    if stats["max_jumps_in_game"] < game_stats["jumps"]:
-        stats["max_jumps_in_game"] = game_stats["jumps"]
+    stats["total_jumps"] += conf.game_stats["jumps"]
+    if stats["min_jumps_in_game"] > conf.game_stats["jumps"]:
+        stats["min_jumps_in_game"] = conf.game_stats["jumps"]
+    if stats["max_jumps_in_game"] < conf.game_stats["jumps"]:
+        stats["max_jumps_in_game"] = conf.game_stats["jumps"]
     
-    stats["total_falls"] += game_stats["falls"]
-    if stats["min_falls_in_game"] > game_stats["falls"]:
-        stats["min_falls_in_game"] = game_stats["falls"]
-    if stats["max_falls_in_game"] < game_stats["falls"]:
-        stats["max_falls_in_game"] = game_stats["falls"]
+    stats["total_falls"] += conf.game_stats["falls"]
+    if stats["min_falls_in_game"] > conf.game_stats["falls"]:
+        stats["min_falls_in_game"] = conf.game_stats["falls"]
+    if stats["max_falls_in_game"] < conf.game_stats["falls"]:
+        stats["max_falls_in_game"] = conf.game_stats["falls"]
     
-    stats["head_bounces"] += game_stats["head_bounces"]
-    stats["wall_bounces"] += game_stats["wall_bounces"]
+    stats["head_bounces"] += conf.game_stats["head_bounces"]
+    stats["wall_bounces"] += conf.game_stats["wall_bounces"]
     
-    if stats["best_screen"] < game_stats["best_screen"]:
-        stats["best_screen"] = game_stats["best_screen"]
+    if stats["best_screen"] < conf.game_stats["best_screen"]:
+        stats["best_screen"] = conf.game_stats["best_screen"]
 
-    stats["total_distance_climbed"] += game_stats["distance_climbed"]
-    stats["total_distance_descended"] += game_stats["distance_descended"]
-    if stats["highest_distance_climbed_in_game"] < game_stats["distance_climbed"]:
-        stats["highest_distance_climbed_in_game"] = game_stats["distance_climbed"]
-    if stats["highest_distance_descended_in_game"] < game_stats["distance_descended"]:
-        stats["highest_distance_descended_in_game"] = game_stats["distance_descended"]
+    stats["total_distance_climbed"] += conf.game_stats["distance_climbed"]
+    stats["total_distance_descended"] += conf.game_stats["distance_descended"]
+    if stats["highest_distance_climbed_in_game"] < conf.game_stats["distance_climbed"]:
+        stats["highest_distance_climbed_in_game"] = conf.game_stats["distance_climbed"]
+    if stats["highest_distance_descended_in_game"] < conf.game_stats["distance_descended"]:
+        stats["highest_distance_descended_in_game"] = conf.game_stats["distance_descended"]
 
 # LEVELS
+def make_levels(tile_images:list):
+    #conf.level_paths = detect_levels()
+
+    objs.levels, objs.level_surfaces = [], []
+    for i in range(len(conf.level_paths)):
+        platforms = create_level(load_level_from_file(i))
+        objs.levels.append(platforms)
+        objs.level_surfaces.append(create_level_surface(platforms, tile_images))
+
 def list_current_folder(path:str):
     """Walks the current folder and outputs all items in that folder"""
     if not os.path.exists(path):
@@ -293,31 +303,32 @@ def list_current_folder(path:str):
                 files.append(entry.name)
     return path, dirs, files
 
-def detect_levels(campaign:str, campaigns_folder:str, level_paths:list):
+def detect_levels():
     """Goes trough all files in given folder and adds them to list of levels *(ordered alphabetically)*"""
-    if campaign != "":
-        filepath = os.path.join(campaigns_folder, campaign, "levels") #f"{campaigns_folder}/{campaign}/levels"
+    conf.level_paths = []
+
+    if conf.CAMPAIGN != "":
+        filepath = os.path.join(conf.campaigns_folder, conf.CAMPAIGN, "levels")
     else:
-        filepath = os.path.join(campaigns_folder, "levels") #f"{campaigns_folder}"
+        filepath = os.path.join(conf.campaigns_folder, "levels")
 
     root, dirs, files = list_current_folder(filepath)
     
     if not files: #tu je za zdej, dokler ne nardim dropdown al neki za zbirat campaign!!
-        print(messages["err_empty_campaign"])
-        filepath = f"{campaigns_folder}"
+        print(conf.messages["err_empty_campaign"])
+        filepath = f"{conf.campaigns_folder}"
         root, dirs, files = list_current_folder(filepath)
 
     for file in files:
         if file.endswith(".txt"):
-            level_paths.append(f"{filepath}/{file}")
-    level_paths.sort()
-    return level_paths
+            conf.level_paths.append(f"{filepath}/{file}")
+    conf.level_paths.sort()
 
 def load_level_from_file(level_number:int):
     """Based on ***level_number*** loads level data from file to list named ***level***"""
 
     level = []
-    with open(level_paths[level_number], 'r') as file:
+    with open(conf.level_paths[level_number], 'r') as file:
         for line_number, line in enumerate(file, start = 1):
             row = []
             for char in line.strip():
@@ -347,12 +358,12 @@ def create_level(level_data:list):
                         neighbors.append(level_data[offset_row][offset_col])
                     else:
                         neighbors.append(0)
-                platforms.append(Platform(col_index * tile_size, row_index * tile_size, tile_size, tile_size, autotile(neighbors)))
+                platforms.append(platform.Platform(col_index * conf.tile_size, row_index * conf.tile_size, conf.tile_size, conf.tile_size, autotile(neighbors)))
     return platforms 
 
 def create_level_surface(level:object, tile_images:list):
     """Creates level surface by combining all platforms/tiles into one surface"""
-    level_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+    level_surface = pygame.Surface((conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT), pygame.SRCALPHA)
 
     for platform in level:
         level_surface.blit(tile_images[platform.type], (platform.rect.x, platform.rect.y))
@@ -403,7 +414,7 @@ def find_valid_subrows(tiles:list, level_rows:list, platform_index:int, platform
         test_tiles = level_rows[testing_platform_index]
 
         # For each previous platform we create area, that the platform occupies
-        test_platform_area = pygame.rect.Rect(test_tiles[0].rect.x, test_tiles[0].rect.y, len(test_tiles) * tile_size, tile_size) # We create an area of platform
+        test_platform_area = pygame.rect.Rect(test_tiles[0].rect.x, test_tiles[0].rect.y, len(test_tiles) * conf.tile_size, conf.tile_size) # We create an area of platform
         
         # If the spaces collide we try searching for sub-area of the platform that is longer than min_row_length and not covered
         if platform_area.colliderect(test_platform_area):
@@ -414,7 +425,7 @@ def find_valid_subrows(tiles:list, level_rows:list, platform_index:int, platform
                 
                 # For each tile of the platform, we check all three tiles above it, 
                 # to see if any of those collides with current platform we are testing against
-                is_space_above_colliding = test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 2 * tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 3 * tile_size)
+                is_space_above_colliding = test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - conf.tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 2 * conf.tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 3 * conf.tile_size)
 
                 # If any of 3 above spaces is in the way, we add that tile to current_subrow of occupied tiles
                 if is_space_above_colliding:
@@ -482,15 +493,24 @@ def combine_subrows(occupied_subrows: list, platform:list, min_row_length:int):
     return valid_subrows
 
 # LOADING GAME FILES
-def load_config(CAMPAIGN = ""):
-    if CAMPAIGN:
-        filepath = os.path.join(campaigns_folder, CAMPAIGN, "config.json")
+def load_config():
+    if conf.CAMPAIGN:
+        filepath = os.path.join(conf.campaigns_folder, conf.CAMPAIGN, "config.json")
     else:
-        filepath = os.path.join(campaigns_folder, "config.json")
+        filepath = os.path.join(conf.campaigns_folder, "config.json")
 
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
             return json.load(file)
+
+def set_config_values():
+    config = load_config()
+    py_objs.music_level_instructions = config.get("levels_music", [])
+    py_objs.music_menus_instructions = config.get("ui_music", {"login": "", "main_menu": "", "endscreen": ""})
+    py_objs.bgs_images_paths = config.get("game_backgrounds", [])
+    py_objs.ui_bgs_images_paths = config.get("ui_backgrounds", {"login": "", "main_menu": "", "endscreen": ""})
+    py_objs.icon_name = config.get("icon")
+    py_objs.babe_position = config.get("babe_position", [])
 
 def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resources_folder:str, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
     from modules.config import SUPPORTED_IMAGE_FORMATS
@@ -547,49 +567,52 @@ def load_sfx(filepath:str, subfolder:str, format:str, resources_folder:str, fall
 
     return sfx
 
-def load_resources(CAMPAIGN):
-    # MYB this pass as parameters?
-    from modules.config import fallback_resources_folder, tile_images_paths, player_images_paths, babe_images_paths, button_images_paths, button_load_sizes, bg_resize_koeficient, sfx_keys, fonts_keys, fonts_sizes, fonts_names, ui_bgs_sizes
-    from modules.pygame_objects import ui_bgs_images_paths, bgs_images_paths
-    resources_folder = os.path.join("campaigns", CAMPAIGN, "resources")
+def load_resources():
+    resources_folder = os.path.join("campaigns", conf.CAMPAIGN, "resources")
+
+    set_config_values()
+    conf.current_level = 0
 
     # zloadamo s campaign resources
     tile_images = []
-    for i in range(len(tile_images_paths)):
+    for i in range(len(conf.tile_images_paths)):
         tile_images.append(None)
-        tile_images[i] = load_image(tile_images_paths[i], "tiles", resources_folder, fallback_resources_folder, (tile_size, tile_size), True)
+        tile_images[i] = load_image(conf.tile_images_paths[i], "tiles", resources_folder, conf.fallback_resources_folder, (conf.tile_size, conf.tile_size), True)
 
     player_images = []
-    for i in range(len(player_images_paths)):
+    for i in range(len(conf.player_images_paths)):
         player_images.append(None)
-        player_images[i] = load_image(player_images_paths[i], "player_animation", resources_folder, fallback_resources_folder, (80, 80), True)
+        player_images[i] = load_image(conf.player_images_paths[i], "player_animation", resources_folder, conf.fallback_resources_folder, (80, 80), True)
 
     babe_images = []
-    for i in range(len(babe_images_paths)):
+    for i in range(len(conf.babe_images_paths)):
         babe_images.append(None)
-        babe_images[i] = load_image(babe_images_paths[i], "babe_animation", resources_folder, fallback_resources_folder, (80, 80), True)
+        babe_images[i] = load_image(conf.babe_images_paths[i], "babe_animation", resources_folder, conf.fallback_resources_folder, (80, 80), True)
 
     buttons = []
-    for i in range(len(button_images_paths)):
+    for i in range(len(conf.button_images_paths)):
         buttons.append(None)
-        buttons[i] = load_image(button_images_paths[i], "other", resources_folder, fallback_resources_folder, button_load_sizes[i], True)
+        buttons[i] = load_image(conf.button_images_paths[i], "other", resources_folder, conf.fallback_resources_folder, conf.button_load_sizes[i], True)
 
     scaled_bgs = []
-    for i in range(len(bgs_images_paths)):
+    for i in range(len(py_objs.bgs_images_paths)):
         scaled_bgs.append(None)
-        scaled_bgs[i] = load_image(bgs_images_paths[i], "bgs", resources_folder, fallback_resources_folder, (1778 * bg_resize_koeficient, 1000 * bg_resize_koeficient))
+        scaled_bgs[i] = load_image(py_objs.bgs_images_paths[i], "bgs", resources_folder, conf.fallback_resources_folder, (1778 * conf.bg_resize_koeficient, 1000 * conf.bg_resize_koeficient))
 
     ui_bgs = {}
-    for key, value in ui_bgs_images_paths.items():
-        ui_bgs[key] = load_image(value, "bgs", resources_folder, fallback_resources_folder, ui_bgs_sizes[key])
+    for key, value in py_objs.ui_bgs_images_paths.items():
+        ui_bgs[key] = load_image(value, "bgs", resources_folder, conf.fallback_resources_folder, conf.ui_bgs_sizes[key])
 
     sfx = {}
-    for i in range(len(sfx_keys)):
-        sfx[sfx_keys[i]] = load_sfx(sfx_keys[i], "sfx", ".wav", resources_folder,fallback_resources_folder)
+    for i in range(len(conf.sfx_keys)):
+        sfx[conf.sfx_keys[i]] = load_sfx(conf.sfx_keys[i], "sfx", ".wav", resources_folder, conf.fallback_resources_folder)
 
     fonts = {}
-    for i in range(len(fonts_keys)):
-        fonts[fonts_keys[i]] = load_font(f"{resources_folder}/other/{fonts_names[i]}.otf", f"{fallback_resources_folder}/other/{fonts_names[i]}.otf", fonts_sizes[i])
+    for i in range(len(conf.fonts_keys)):
+        fonts[conf.fonts_keys[i]] = load_font(f"{resources_folder}/other/{conf.fonts_names[i]}.otf", f"{conf.fallback_resources_folder}/other/{conf.fonts_names[i]}.otf", conf.fonts_sizes[i])
+
+    detect_levels()
+    make_levels(tile_images)
 
     return tile_images, player_images, babe_images, buttons, scaled_bgs, ui_bgs, sfx, fonts
         
