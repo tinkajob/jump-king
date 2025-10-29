@@ -9,10 +9,10 @@ pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Jump King")
 pygame.display.set_icon(pygame.image.load(os.path.join(conf.fallback_resources_folder, "other", "icon.png")))
-VOLUME_MASTER = conf.def_stats["volume_master"]
-VOLUME_SFX = conf.def_stats["volume_sfx"]
-VOLUME_MUSIC = conf.def_stats["volume_music"]
-objs.game_music.set_volume(py_objs.sfx, VOLUME_MASTER, VOLUME_SFX, VOLUME_MUSIC)
+conf.VOLUME_MASTER = conf.def_stats["volume_master"]
+conf.VOLUME_SFX = conf.def_stats["volume_sfx"]
+conf.VOLUME_MUSIC = conf.def_stats["volume_music"]
+objs.game_music.set_volume(py_objs.sfx, conf.VOLUME_MASTER, conf.VOLUME_SFX, conf.VOLUME_MUSIC)
 
 while conf.WINDOW_OPEN:
     conf.current_menu = "login"
