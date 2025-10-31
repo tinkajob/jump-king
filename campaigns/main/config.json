@@ -4,7 +4,6 @@
         "login": "main_menu",
         "main_menu": "main_menu",
         "endscreen": "sunrise"
-
     },
     "levels_music": [
         "",
@@ -12,7 +11,7 @@
         "sewer",
         "sewer"
     ],
-    "COMMENT": "For the backgrounds you need to type in the name (format - .png, .jpg, ... wil be added automatically) of the image you want for your level (it needs to be in resources/bgs/)",
+    "COMMENT": "For the backgrounds you need to type in the name of the image you want for your level. (It needs to be in resources/bgs/)(Format (.png, .jpg, ...) wil be added automatically)",
     "game_backgrounds":[
         "bg0",
         "bg1", 
