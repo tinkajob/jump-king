@@ -146,6 +146,7 @@ messages = {
     "err_password": f"ERROR logging in!\nPassword you entered is incorrect!",
     "err_loading_music_config": f"Failed to load config file for music!",
     "err_empty_campaign": f"This campaign has no levels!", 
+    "err_no_campaign_selected": f"Please select a campaign to continue!",
     "loaded_music_config": f"Music config loaded successfully!",
     "endscreen": f"Press any key to continue...",
 }

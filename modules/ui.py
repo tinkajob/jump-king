@@ -280,6 +280,10 @@ class Notification:
         self.text.text = message
         self.update()
 
+    def clear_notification_if_clicked(self:object):
+        if self.is_clicked():
+            self.is_visible = False
+
     def delete_notification(self):
         self.is_visible = False
 
@@ -315,7 +319,7 @@ class Notification:
                 return True
             return False
 
-class DropdownMenu: # Finish this (for dropdown menus!)
+class DropdownMenu:
     def __init__(self, pos_tuple: tuple[int, int], dimentions:tuple[int, int], items:list):
         self.position = pos_tuple
         self.dimentions = dimentions

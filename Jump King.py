@@ -25,7 +25,10 @@ while conf.WINDOW_OPEN:
     conf.faded_in = False
 
     py_objs.clock.tick()
+
+
     while conf.LOGIN:
+        # LOGIN ===========================================================================
         # If we havent already started fade-in (first frame) we start fade-in
         if not conf.faded_in:
             objs.effect.start_fade_in()
@@ -46,18 +49,24 @@ while conf.WINDOW_OPEN:
         objs.password_input.capture_input(events, objs.username_text, objs.password_text)
         objs.cursor.update()
         objs.campaign_dropdown.handle_highliting(events)
+        objs.notification.clear_notification_if_clicked()
 
         if objs.submit_button.is_clicked():
             if not conf.submit_button_already_clicked:
                 py_objs.sfx["click"].play()
-
-            # We only want transition if music is different for login and main menu
-            if py_objs.music_menus_instructions["login"] != py_objs.music_menus_instructions["main_menu"]:
-                objs.game_music.play_fadeout()
-            conf.submit_button_already_clicked = True
-            conf.PLAYER_NAME = objs.username_input.input_text
-            conf.next_scene = utils.log_in(objs.username_input.input_text, objs.password_input.input_text, objs.title, objs.effect, objs.username_input, objs.password_input, objs.username_text, objs.password_text, conf.stats)
+            
             conf.CAMPAIGN = objs.campaign_dropdown.get_selection()
+            if conf.CAMPAIGN != "":
+                conf.next_scene = utils.log_in(objs.username_input.input_text, objs.password_input.input_text, objs.title, objs.effect, objs.username_input, objs.password_input, objs.username_text, objs.password_text, conf.stats)
+                
+                # We only want transition if music is different for login and main menu
+                if py_objs.music_menus_instructions["login"] != py_objs.music_menus_instructions["main_menu"]:
+                    objs.game_music.play_fadeout()
+                conf.submit_button_already_clicked = True
+                conf.PLAYER_NAME = objs.username_input.input_text
+            else:
+                conf.next_scene = "login"
+                objs.notification.show_notification(conf.messages["err_no_campaign_selected"])
 
         if objs.quit_button.is_clicked():
             if not conf.quit_button_already_clicked:
@@ -81,6 +90,8 @@ while conf.WINDOW_OPEN:
 
         pygame.display.flip()
 
+        # LOGIN ===========================================================================
+
     if not conf.loaded_player_stats:
         utils.load_player_stats(conf.PLAYER_NAME, conf.stats)
         objs.game_music.update_volume(conf.stats)
@@ -100,6 +111,7 @@ while conf.WINDOW_OPEN:
     py_objs.clock.tick()
 
     while conf.MAIN_MENU:
+        # MAIN MENU ===========================================================================
         delta_time = py_objs.clock.tick(conf.FPS_cap_menus) / 1000.0
         conf.time_spent += delta_time
 
@@ -168,6 +180,7 @@ while conf.WINDOW_OPEN:
             utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
 
         pygame.display.flip()
+        # MAIN MENU ===========================================================================
 
     if conf.next_scene != "login":
         pygame.mixer.music.stop()
@@ -193,6 +206,7 @@ while conf.WINDOW_OPEN:
     py_objs.clock.tick()
 
     while conf.GAME_RUNNING:
+        # GAME LOOP ===========================================================================
         if not conf.faded_in:
             objs.effect.start_fade_in()
             conf.faded_in = True
@@ -256,6 +270,7 @@ while conf.WINDOW_OPEN:
 
         objs.effect.update(delta_time, py_objs.screen)
         pygame.display.flip()
+        # GAME LOOP ===========================================================================
 
     conf.faded_in = False
 
@@ -269,6 +284,7 @@ while conf.WINDOW_OPEN:
     objs.notification.show_notification(conf.messages["endscreen"])
 
     while conf.ENDSCREEN:
+        # ENDSCREEN ===========================================================================
         delta_time = py_objs.clock.tick(conf.FPS_cap_menus) / 1000.0
         conf.time_spent += delta_time
 
@@ -284,7 +300,7 @@ while conf.WINDOW_OPEN:
 
         keys = pygame.key.get_pressed()
 
-        objs.notification.is_clicked()
+        objs.notification.clear_notification_if_clicked()
 
         if conf.next_scene == "endscreen" or ((conf.next_scene == "main_menu" or conf.next_scene == "quit") and objs.effect.get_active()):
             utils.draw_scene("endscreen", py_objs.screen, py_objs.scaled_bgs, py_objs.ui_bgs)
