@@ -322,7 +322,7 @@ class DropdownMenu: # Finish this (for dropdown menus!)
         self.items = items
         self.items_texts = []
         self.row_height = 50 # How high is each row
-        self.item_length_limit = 50
+        self.item_width_limit = self.dimentions[0] - 20 # In pixels
         self.rect_border_width = 5
         self.highlited_item = 0
         self.rect = pygame.rect.Rect(self.position[0], self.position[1], self.dimentions[0], self.dimentions[1])
@@ -333,8 +333,10 @@ class DropdownMenu: # Finish this (for dropdown menus!)
         self.color = "grey_dark"
         self.selected_item = ""
         self.selection_text = "Select a campaign"
-        self.last_highlited_change_made_by = "" # For when we handle confirming selectio
+        self.last_highlited_change_made_by = "" # For when we handle confirming selection
+        self.font = "bold"
         self.items.sort()
+        self.limit_item_length()
         self.create_texts()
 
     def draw(self:object, screen:pygame.surface.Surface):
@@ -416,16 +418,29 @@ class DropdownMenu: # Finish this (for dropdown menus!)
 
     def create_texts(self:object):
         """Create text objects for all the items in the dropdown."""
-        self.items_texts.append(Text("Select a campaign", "white", "bold", (self.position[0] + 15, self.position[1] + 25), False))
+        self.items_texts.append(Text("Select a campaign", "white", self.font, (self.position[0] + 15, self.position[1] + 25), False))
 
         for i in range(len(self.items)):
-            self.items_texts.append(Text(self.items[i], "white", "bold", (self.position[0] + 10, self.position[1] + self.dimentions[1] + self.rect_border_width + self.row_height * i), False))
+            self.items_texts.append(Text(self.items[i], "white", self.font, (self.position[0] + 15, self.position[1] + self.dimentions[1] + self.rect_border_width + self.row_height * i), False))
 
     def get_selection(self:object):
         return self.selected_item
 
-    def limit_item_length(self:object, limit:int): #naredi da ce je item predolg, na napise "name od the ite..."
-        pass
+    def limit_item_length(self:object):
+        """Edit items texts so that if they are too long, they get shortened by getting ... at the end"""
+        
+        # For each element in the list of items we check if the name length is too big
+        for item_index in range(len(self.items)):
+            current_str = ""
+            for letter in self.items[item_index]:
+                current_str += letter
+
+                # If it is, then we simply remove what we have added of too much and replace it with "..."
+                if py_objs.fonts[self.font].size(current_str)[0] > self.item_width_limit:
+                    current_str = current_str[:-4]
+                    current_str += "..."
+                    self.items[item_index] = current_str
+                    break
 
 class Slider:
     def __init__(self:object, max_value):

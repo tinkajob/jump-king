@@ -69,7 +69,7 @@ PLAYER_NAME = ""
 #============================= PLAYER & ENTITIES =============================
 
 #============================= SOUND =============================
-VOLUME_MASTER = 0.5 #s tem volumom zacnemo!
+VOLUME_MASTER = 0.5
 VOLUME_SFX = 0.1
 VOLUME_MUSIC = 0.1
 musics = {
