@@ -6,7 +6,7 @@ import modules.objects as objs
 import modules.config as conf
 
 #MISCELANEOUS
-def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, username_text:str, password_text:str, stats:list):
+def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, stats:list):
     """Handles user login and account creation based on provided inputs."""
 
     is_new_player = load_player_stats(username)
@@ -36,10 +36,10 @@ def log_in(username:str, password:str, title:str, effect:object, username_input:
         username_input.input_text = ""
         password_input.input_text = ""
         password_input.masked_text = ""
-        username_text.text = ""
-        password_text.text = ""
-        username_text.update()
-        password_text.update()
+        username_input.text.text = ""
+        password_input.text.text = ""
+        username_input.text.update()
+        password_input.text.update()
         next_scene = "login"
         
     save_player_stats(username, stats)
@@ -206,8 +206,6 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objs.password_input.draw(screen)
         objs.submit_text.draw(screen)
         objs.quit_text.draw(screen) # Za ta tekst naredi da se narise ze ku poklices button funkcijo (da je kar part od buttona)
-        objs.username_text.draw(screen)
-        objs.password_text.draw(screen)
         objs.cursor.draw(screen, delta_time)
         objs.campaign_dropdown.draw(screen)
         objs.notification.draw(screen)

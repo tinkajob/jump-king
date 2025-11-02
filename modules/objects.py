@@ -30,8 +30,6 @@ play_text = ui.Text("PLAY", "white", "normal", play_button.rect.center)
 quit_text = ui.Text("QUIT", "white", "smaller", quit_button.rect.center)
 submit_text = ui.Text("Submit", "white", "normal", submit_button.rect.center)
 logout_text = ui.Text("Logout", "white", "normal", logout_button.rect.center)
-username_text = ui.Text("username", "white", "smaller", username_input.rect.center)
-password_text = ui.Text("password", "white", "smaller", password_input.rect.center)
 FPS_text = ui.Text("000", "grey_dark", "timer", (conf.SCREEN_WIDTH - 60,15))
 timer_text = ui.Text("0:00:00", "grey_dark", "timer", (50, 15))
 

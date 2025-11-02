@@ -85,47 +85,45 @@ class InputField:
         self.input_text = ""
         self.masked_text = ""
         self.is_focused = False
-        self.type = type
+        self.text_if_empty = type
         self.changed_this_frame = False
+        self.text = Text("username", "white", "smaller", self.rect.center)
     
     def draw(self:object, screen:pygame.Surface):
         """Draws input field on the screen"""
         pygame.draw.rect(screen, conf.colors[self.color], self.rect, 5, 25)
+        self.text.draw(screen)
 
-    def capture_input(self:object, events:list, username_text:object, password_text:object):
+    def capture_input(self:object, events:list):
         """Captures text from the input field and updates the corresponding text object"""
         from modules.objects import cursor
         self.get_focused()
         if not self.is_focused:
+            if self.input_text == "":
+                self.text.text = self.text_if_empty
+                self.text.update()
             return
 
         self.changed_this_frame = False
-        self.backspace_pressed = False
 
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     self.input_text = self.input_text[:-1]
-                    if self.mask_input:
-                        self.masked_text = self.masked_text[:-1]
                     self.changed_this_frame = True
                 
                 elif event.key == pygame.K_RETURN:
-                    self.is_focused = False
+                    self.set_focused(False)
                 
                 elif event.unicode.isprintable() and len(self.input_text) < 20:
                     self.input_text += event.unicode
-                    if self.mask_input:
-                        self.masked_text += "*"
                     self.changed_this_frame = True
 
-        if self.type == "username":
-            username_text.text = self.input_text
-            username_text.update()
-            
-        elif self.type == "password":
-            password_text.text = self.masked_text
-            password_text.update()
+        if self.mask_input:
+            self.text.text = "*" * len(self.input_text)
+        else:
+            self.text.text = self.input_text
+        self.text.update()
             
         if self.changed_this_frame:
             cursor.time_untill_blink = 0.5
@@ -134,13 +132,16 @@ class InputField:
         """Manages functionality of being in focus"""
         mouse_pos = pygame.mouse.get_pos()
         if pygame.mouse.get_pressed()[0]:
-            if self.rect.collidepoint(mouse_pos):
-                self.color = "mint_dark"
-                self.is_focused = True
+            self.set_focused(self.rect.collidepoint(mouse_pos))
+        
+    def set_focused(self:object, focus_check:bool):
+        if focus_check:
+            self.color = "mint_dark"
+            self.is_focused = True
 
-            else:
-                self.color = "grey_dark"
-                self.is_focused = False
+        else:
+            self.color = "grey_dark"
+            self.is_focused = False
 
 class Cursor:
     def __init__(self:object, pos_tuple:tuple [int, int], size_tuple:tuple [int, int]):
@@ -172,15 +173,15 @@ class Cursor:
     
     def update(self:object):
         """Updates cursors state and position"""
-        from modules.objects import password_input, username_input, username_text, password_text
+        from modules.objects import password_input, username_input
         if username_input.is_focused:
-            self.rect.x = username_text.rect.right + 5
-            self.rect.centery = username_text.rect.centery
+            self.rect.x = username_input.text.rect.right + 5
+            self.rect.centery = username_input.text.rect.centery
             self.can_draw = True
 
         elif password_input.is_focused:
-            self.rect.x = password_text.rect.right + 5
-            self.rect.centery = password_text.rect.centery
+            self.rect.x = password_input.text.rect.right + 5
+            self.rect.centery = password_input.text.rect.centery
             self.can_draw = True
         
         else:

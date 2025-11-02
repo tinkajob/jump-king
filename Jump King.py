@@ -44,8 +44,8 @@ while conf.WINDOW_OPEN:
                 conf.next_scene = "quit"
                 objs.game_music.play_fadeout()
 
-        objs.username_input.capture_input(events, objs.username_text, objs.password_text)
-        objs.password_input.capture_input(events, objs.username_text, objs.password_text)
+        objs.username_input.capture_input(events)
+        objs.password_input.capture_input(events)
         objs.cursor.update()
         objs.campaign_dropdown.handle_highliting(events)
         objs.notification.clear_notification_if_clicked()
@@ -56,7 +56,7 @@ while conf.WINDOW_OPEN:
             
             conf.CAMPAIGN = objs.campaign_dropdown.get_selection()
             if conf.CAMPAIGN != "":
-                conf.next_scene = utils.log_in(objs.username_input.input_text, objs.password_input.input_text, objs.title, objs.effect, objs.username_input, objs.password_input, objs.username_text, objs.password_text, conf.stats)
+                conf.next_scene = utils.log_in(objs.username_input.input_text, objs.password_input.input_text, objs.title, objs.effect, objs.username_input, objs.password_input, conf.stats)
                 
                 # We only want transition if music is different for login and main menu
                 if py_objs.music_menus_instructions["login"] != py_objs.music_menus_instructions["main_menu"]:
@@ -149,11 +149,11 @@ while conf.WINDOW_OPEN:
             conf.logout_button_already_clicked = True
             objs.username_input.input_text = ""
             objs.password_input.input_text = ""
-            objs.password_input.masked_text = ""
-            objs.username_text.text = ""
-            objs.password_text.text = ""
-            objs.username_text.update()
-            objs.password_text.update()
+            # objs.password_input.masked_text = ""
+            objs.username_input.text.text = ""
+            objs.password_input.text.text = ""
+            objs.username_input.text.update()
+            objs.password_input.text.update()
 
         utils.draw_scene("main_menu", py_objs.screen, py_objs.scaled_bgs, py_objs.ui_bgs)
         objs.effect.update(delta_time, py_objs.screen)
