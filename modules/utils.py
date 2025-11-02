@@ -9,36 +9,41 @@ import modules.config as conf
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, username_text:str, password_text:str, stats:list):
     """Handles user login and account creation based on provided inputs."""
 
-    load_player_stats(username, stats)
-    if username != "" and username.lower() != "guest":
-        if stats.get("password", 0) == 0:
-            stats["password"] = hash_password(password)
-            title.text = f"Welcome, {username}!"
-            title.update()
-            effect.start_fade_out()
-            return "main_menu"
-        
-        #if the password is incorrect
-        elif hash_password(password) != stats["password"]:
-                username_input.input_text = ""
-                password_input.input_text = ""
-                password_input.masked_text = ""
-                username_text.text = ""
-                password_text.text = ""
-                username_text.update()
-                password_text.update()
-        else:
-            title.text = f"Welcome back, {username}!"
-            title.update()
-            effect.start_fade_out()
-            return "main_menu"
-    else:
+    is_new_player = load_player_stats(username)
+    next_scene = "main_menu"
+
+    # If we play as quest
+    if username == "" or username.lower() == "quest":
         title.text = "Welcome!"
         title.update()
         effect.start_fade_out()
         return "main_menu"
+
+    if is_new_player:
+        stats["password"] = hash_password(password)
+        title.text = f"Welcome, {username}!"
+        title.update()
+        effect.start_fade_out()
+        return "main_menu"
+    
+    # If the user's password is correct
+    if hash_password(password) == stats["password"]:
+        title.text = f"Welcome back, {username}!"
+        title.update()
+        effect.start_fade_out()
+    
+    else:
+        username_input.input_text = ""
+        password_input.input_text = ""
+        password_input.masked_text = ""
+        username_text.text = ""
+        password_text.text = ""
+        username_text.update()
+        password_text.update()
+        next_scene = "login"
         
     save_player_stats(username, stats)
+    return next_scene
 
 def hash_password(password:str):
     """Encrypts password using hash function"""
@@ -221,8 +226,11 @@ def save_player_stats(PLAYER_NAME:str, stats:list):
     with open(filepath, "w") as file:
         json.dump(stats, file, indent = 4)
 
-def load_player_stats(PLAYER_NAME:str, stats:list):
+def load_player_stats(PLAYER_NAME:str):
     """Loads player stats from its corresponding file"""
+
+    is_new_player = False
+
     if PLAYER_NAME != "":
         filepath = os.path.join(conf.stats_folder, f"{PLAYER_NAME}_stats.json")
     else:
@@ -231,17 +239,20 @@ def load_player_stats(PLAYER_NAME:str, stats:list):
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
             loaded_stats = json.load(file)
-        stats.clear()
-        stats.update(loaded_stats)
+        conf.stats.clear()
+        conf.stats.update(loaded_stats)
     else:
         # If the player's stats file doesn't exist (new player)
-        for stat in stats:
-            stats[stat] = conf.def_stats[stat]
+        for stat in conf.def_stats:
+            conf.stats[stat] = conf.def_stats[stat]
+            is_new_player = True
     
     #ce trenutno v stats.json ni neke vrednosti (smo na novo uvedli/ponesreci zbrisana), jo nastavimo na fallback vrednost
     for key, value in conf.def_stats.items():
-        if key not in stats:
-            stats[key] = value
+        if key not in conf.stats:
+            conf.stats[key] = value
+    
+    return is_new_player
 
 def wipe_stats(PLAYER_NAME:str, stats:list, def_stats:list):
     """Resets all player values to 0 and saves them"""

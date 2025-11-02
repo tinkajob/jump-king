@@ -89,11 +89,10 @@ while conf.WINDOW_OPEN:
             conf.QUITTING_GAME = True
 
         pygame.display.flip()
-
         # LOGIN ===========================================================================
 
     if not conf.loaded_player_stats:
-        utils.load_player_stats(conf.PLAYER_NAME, conf.stats)
+        utils.load_player_stats(conf.PLAYER_NAME)
         objs.game_music.update_volume(conf.stats)
 
     conf.faded_in = False
