@@ -213,10 +213,14 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objs.notification.draw(screen)
 
 # MANAGING PLAYER STATS
-def save_player_stats(PLAYER_NAME:str, stats:list):
+def save_player_stats(PLAYER_NAME:str, saving_reason:str = ""):
     """Saves player stats to its corresponding file"""
     os.makedirs(conf.stats_folder, exist_ok=True)
-    update_player_stats(stats)
+    
+    if saving_reason == "game_ended":
+        update_player_stats()
+    elif saving_reason == "ragequit":
+        update_player_stats(True)
 
     if PLAYER_NAME != "":
         filepath = os.path.join(conf.stats_folder, f"{PLAYER_NAME}_stats.json")
@@ -224,7 +228,7 @@ def save_player_stats(PLAYER_NAME:str, stats:list):
         filepath = os.path.join(conf.stats_folder, "guest_stats.json")
     
     with open(filepath, "w") as file:
-        json.dump(stats, file, indent = 4)
+        json.dump(conf.stats, file, indent = 4)
 
 def load_player_stats(PLAYER_NAME:str):
     """Loads player stats from its corresponding file"""
@@ -260,33 +264,35 @@ def wipe_stats(PLAYER_NAME:str, stats:list, def_stats:list):
         stats[stat] = def_stats[stat]
     save_player_stats(PLAYER_NAME, stats)
 
-def update_player_stats(stats:list):
+def update_player_stats(ragequitting:bool = False):
     """Updates player stats based on stats from his last game"""
     #tle do pravila za use statse kku se jih zdruzuje
-    stats["total_jumps"] += conf.game_stats["jumps"]
-    if stats["min_jumps_in_game"] > conf.game_stats["jumps"]:
-        stats["min_jumps_in_game"] = conf.game_stats["jumps"]
-    if stats["max_jumps_in_game"] < conf.game_stats["jumps"]:
-        stats["max_jumps_in_game"] = conf.game_stats["jumps"]
-    
-    stats["total_falls"] += conf.game_stats["falls"]
-    if stats["min_falls_in_game"] > conf.game_stats["falls"]:
-        stats["min_falls_in_game"] = conf.game_stats["falls"]
-    if stats["max_falls_in_game"] < conf.game_stats["falls"]:
-        stats["max_falls_in_game"] = conf.game_stats["falls"]
-    
-    stats["head_bounces"] += conf.game_stats["head_bounces"]
-    stats["wall_bounces"] += conf.game_stats["wall_bounces"]
-    
-    if stats["best_screen"] < conf.game_stats["best_screen"]:
-        stats["best_screen"] = conf.game_stats["best_screen"]
 
-    stats["total_distance_climbed"] += conf.game_stats["distance_climbed"]
-    stats["total_distance_descended"] += conf.game_stats["distance_descended"]
-    if stats["highest_distance_climbed_in_game"] < conf.game_stats["distance_climbed"]:
-        stats["highest_distance_climbed_in_game"] = conf.game_stats["distance_climbed"]
-    if stats["highest_distance_descended_in_game"] < conf.game_stats["distance_descended"]:
-        stats["highest_distance_descended_in_game"] = conf.game_stats["distance_descended"]
+    # These values will update even if we ragequit, because they must/can be updated without risk
+    conf.stats["total_jumps"] += conf.game_stats["jumps"]
+    conf.stats["total_falls"] += conf.game_stats["falls"]
+    
+    conf.stats["max_jumps_in_game"] = max(conf.game_stats["jumps"], conf.stats["max_jumps_in_game"])
+    conf.stats["max_falls_in_game"] = max(conf.game_stats["falls"], conf.stats["max_falls_in_game"])
+    
+    conf.stats["head_bounces"] += conf.game_stats["head_bounces"]
+    conf.stats["wall_bounces"] += conf.game_stats["wall_bounces"]
+    
+    conf.stats["best_screen"] = max(conf.game_stats["best_screen"], conf.stats["best_screen"])
+    
+    conf.stats["total_distance_climbed"] += conf.game_stats["distance_climbed"]
+    conf.stats["total_distance_descended"] += conf.game_stats["distance_descended"]
+    
+    conf.stats["highest_distance_climbed_in_game"] = max(conf.game_stats["distance_climbed"], conf.stats["highest_distance_climbed_in_game"])
+    conf.stats["highest_distance_descended_in_game"] = max(conf.game_stats["distance_descended"], conf.stats["highest_distance_descended_in_game"])
+    
+    # Values below will only save/update if we reached end of 
+    # If we finish before we reach the end, stats below this if statement could be saved incorrectly
+    if ragequitting:
+        return
+
+    conf.stats["min_jumps_in_game"] = min(conf.game_stats["jumps"], conf.stats["min_jumps_in_game"])
+    conf.stats["min_falls_in_game"] = min(conf.game_stats["falls"], conf.stats["min_falls_in_game"])
 
 # LEVELS
 def make_levels(tile_images:list):

@@ -26,7 +26,6 @@ while conf.WINDOW_OPEN:
 
     py_objs.clock.tick()
 
-
     while conf.LOGIN:
         # LOGIN ===========================================================================
         # If we havent already started fade-in (first frame) we start fade-in
@@ -91,10 +90,6 @@ while conf.WINDOW_OPEN:
         pygame.display.flip()
         # LOGIN ===========================================================================
 
-    if not conf.loaded_player_stats:
-        utils.load_player_stats(conf.PLAYER_NAME)
-        objs.game_music.update_volume(conf.stats)
-
     conf.faded_in = False
     conf.play_button_already_clicked = False
     conf.quit_button_already_clicked = False
@@ -121,7 +116,6 @@ while conf.WINDOW_OPEN:
         # If we close the window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
                 objs.effect.start_fade_out()
                 objs.game_music.play_fadeout()
                 conf.next_scene = "quit"
@@ -169,6 +163,7 @@ while conf.WINDOW_OPEN:
             conf.GAME_RUNNING = True
 
         if conf.next_scene == "quit" and not objs.effect.get_active():
+            utils.save_player_stats(conf.PLAYER_NAME, "quitting")
             conf.MAIN_MENU = False
             conf.WINDOW_OPEN = False
             conf.QUITTING_GAME = True
@@ -176,7 +171,7 @@ while conf.WINDOW_OPEN:
         if conf.next_scene == "login" and not objs.effect.get_active():
             conf.LOGIN = True
             conf.MAIN_MENU = False
-            utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
+            utils.save_player_stats(conf.PLAYER_NAME, "logout")
 
         pygame.display.flip()
         # MAIN MENU ===========================================================================
@@ -200,7 +195,6 @@ while conf.WINDOW_OPEN:
 
     if not conf.QUITTING_GAME:
         # That's commented out just because for now we set campaign on the login screen
-        #py_objs.tile_images, py_objs.player_images, py_objs.babe_images, py_objs.buttons, py_objs.scaled_bgs, py_objs.ui_bgs, py_objs.sfx, py_objs.fonts = utils.load_resources(conf.CAMPAIGN, conf.fallback_resources_folder, conf.tile_images_paths, conf.player_images_paths, conf.babe_images_paths, conf.button_images_paths, conf.button_load_sizes, conf.bg_resize_koeficient, conf.sfx_keys, conf.fonts_keys, conf.fonts_sizes, conf.fonts_names, conf.ui_bgs_sizes, py_objs.ui_bgs_images_paths, py_objs.bgs_images_paths) #tu poklicemo po tem ku zberemo campaign!!! ZELU HEAVY FUNKCIJA
         objs.main_babe.find_position(py_objs.babe_position, objs.levels[len(objs.levels) - 1], conf.tile_size, conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT) # Find babe position based on config file or automatically
     py_objs.clock.tick()
 
@@ -231,7 +225,7 @@ while conf.WINDOW_OPEN:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 conf.stats["ragequits"] += 1
-                utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
+                utils.save_player_stats(conf.PLAYER_NAME, "ragequit")
                 objs.game_music.play_fadeout()
                 objs.effect.start_fade_out()
                 conf.next_scene = "quit"
@@ -313,7 +307,7 @@ while conf.WINDOW_OPEN:
             conf.next_scene = "main_menu"
 
         if conf.next_scene == "main_menu" and not objs.effect.get_active():
-            utils.save_player_stats(conf.PLAYER_NAME, conf.stats)
+            utils.save_player_stats(conf.PLAYER_NAME, "game_ended")
             conf.ENDSCREEN = False
             conf.MAIN_MENU = True
             conf.faded_in = False
