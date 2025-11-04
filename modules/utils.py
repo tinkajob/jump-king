@@ -5,7 +5,7 @@ import modules.pygame_objects as py_objs
 import modules.objects as objs
 import modules.config as conf
 
-#MISCELANEOUS
+# MISCELANEOUS
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, stats:list):
     """Handles user login and account creation based on provided inputs."""
 
@@ -294,8 +294,6 @@ def update_player_stats(ragequitting:bool = False):
 
 # LEVELS
 def make_levels(tile_images:list):
-    #conf.level_paths = detect_levels()
-
     objs.levels, objs.level_surfaces = [], []
     for i in range(len(conf.level_paths)):
         platforms = create_level(load_level_from_file(i))
@@ -329,14 +327,14 @@ def detect_levels():
 
     root, dirs, files = list_current_folder(filepath)
     
-    if not files: #tu je za zdej, dokler ne nardim dropdown al neki za zbirat campaign!!
+    if not files:
         print(conf.messages["err_empty_campaign"])
-        filepath = f"{conf.campaigns_folder}"
+        filepath = os.path.join(conf.campaigns_folder, "levels")
         root, dirs, files = list_current_folder(filepath)
 
     for file in files:
         if file.endswith(".txt"):
-            conf.level_paths.append(f"{filepath}/{file}")
+            conf.level_paths.append(os.path.join(filepath, file))
     conf.level_paths.sort()
 
 def load_level_from_file(level_number:int):
@@ -461,7 +459,7 @@ def find_valid_subrows(tiles:list, level_rows:list, platform_index:int, platform
     valid_subrows = combine_subrows(occupied_subrows, tiles, min_row_length)
 
     return valid_subrows
-    
+
 def combine_subrows(occupied_subrows: list, platform:list, min_row_length:int):
     """Out of all occupied_subrows we project occupied tiles on initial platform, and then form valid subrows from this projection"""
     valid_subrows = []
@@ -529,22 +527,22 @@ def set_config_values():
 
 def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resources_folder:str, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
     from modules.config import SUPPORTED_IMAGE_FORMATS
-    
+
     path = os.path.join(resources_folder, subfolder, filepath)
     fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath)
     found_image = False
 
     for format in SUPPORTED_IMAGE_FORMATS:
-        if os.path.exists(f"{path}{format}"):
-            image = pygame.transform.flip(pygame.image.load(f"{path}{format}"), flip_x, flip_y)
+        if os.path.exists(os.path.join(path, format)):
+            image = pygame.transform.flip(pygame.image.load(os.path.join(path, format)), flip_x, flip_y)
             found_image = True
-    
+
     if not found_image:
         for format in SUPPORTED_IMAGE_FORMATS:
-            if os.path.exists(f"{fallback_path}{format}"):
-                image = pygame.transform.flip(pygame.image.load(f"{fallback_path}{format}"), flip_x, flip_y)
+            if os.path.exists(os.path.join(fallback_path, format)):
+                image = pygame.transform.flip(pygame.image.load(os.path.join(fallback_path, format)), flip_x, flip_y)
                 found_image = True
-    
+
     if not found_image:
         print("Couldn't load image")
         return
@@ -588,7 +586,6 @@ def load_resources():
     set_config_values()
     conf.current_level = 0
 
-    # zloadamo s campaign resources
     tile_images = []
     for i in range(len(conf.tile_images_paths)):
         tile_images.append(None)
@@ -622,12 +619,11 @@ def load_resources():
     for i in range(len(conf.sfx_keys)):
         sfx[conf.sfx_keys[i]] = load_sfx(conf.sfx_keys[i], "sfx", ".wav", resources_folder, conf.fallback_resources_folder)
 
-    fonts = {}
+    fonts = {}# os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf")
     for i in range(len(conf.fonts_keys)):
-        fonts[conf.fonts_keys[i]] = load_font(f"{resources_folder}/other/{conf.fonts_names[i]}.otf", f"{conf.fallback_resources_folder}/other/{conf.fonts_names[i]}.otf", conf.fonts_sizes[i])
+        fonts[conf.fonts_keys[i]] = load_font(os.path.join(conf.resources_folder, "other", conf.fonts_names[i] + ".otf"), os.path.join(conf.fallback_resources_folder, "other", conf.fonts_names[i] + ".otf"), conf.fonts_sizes[i])
 
     detect_levels()
     make_levels(tile_images)
 
     return tile_images, player_images, babe_images, buttons, scaled_bgs, ui_bgs, sfx, fonts
-        
