@@ -4,6 +4,7 @@ import modules.platform as platform
 import modules.pygame_objects as py_objs
 import modules.objects as objs
 import modules.config as conf
+# from modules.config import SUPPORTED_IMAGE_FORMATS
 
 # MISCELANEOUS
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, stats:list):
@@ -526,21 +527,21 @@ def set_config_values():
     py_objs.babe_position = config.get("babe_position", [])
 
 def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resources_folder:str, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
-    from modules.config import SUPPORTED_IMAGE_FORMATS
-
     path = os.path.join(resources_folder, subfolder, filepath)
     fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath)
     found_image = False
 
-    for format in SUPPORTED_IMAGE_FORMATS:
-        if os.path.exists(os.path.join(path, format)):
-            image = pygame.transform.flip(pygame.image.load(os.path.join(path, format)), flip_x, flip_y)
+    for format in conf.SUPPORTED_IMAGE_FORMATS:
+        current_path = path + format
+        if os.path.exists(current_path):
+            image = pygame.transform.flip(pygame.image.load(current_path), flip_x, flip_y)
             found_image = True
 
     if not found_image:
-        for format in SUPPORTED_IMAGE_FORMATS:
-            if os.path.exists(os.path.join(fallback_path, format)):
-                image = pygame.transform.flip(pygame.image.load(os.path.join(fallback_path, format)), flip_x, flip_y)
+        for format in conf.SUPPORTED_IMAGE_FORMATS:
+            current_path = fallback_path + format
+            if os.path.exists(current_path):
+                image = pygame.transform.flip(pygame.image.load(current_path), flip_x, flip_y)
                 found_image = True
 
     if not found_image:
@@ -621,7 +622,7 @@ def load_resources():
 
     fonts = {}# os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf")
     for i in range(len(conf.fonts_keys)):
-        fonts[conf.fonts_keys[i]] = load_font(os.path.join(conf.resources_folder, "other", conf.fonts_names[i] + ".otf"), os.path.join(conf.fallback_resources_folder, "other", conf.fonts_names[i] + ".otf"), conf.fonts_sizes[i])
+        fonts[conf.fonts_keys[i]] = load_font(os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf"), os.path.join(conf.fallback_resources_folder, "other", conf.fonts_names[i] + ".otf"), conf.fonts_sizes[i])
 
     detect_levels()
     make_levels(tile_images)

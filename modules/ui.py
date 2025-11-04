@@ -188,28 +188,27 @@ class Cursor:
             self.can_draw = False
 
 class Button:
-    def __init__(self:object, pos_tuple:tuple [int, int], size_tuple:tuple [int, int], type: str):
+    def __init__(self:object, pos_tuple:tuple [int, int], size_tuple:tuple [int, int], offset:int = 0):
         """Creates a clickable button"""
         self.rect = pygame.Rect(pos_tuple[0], pos_tuple[1], size_tuple[0], size_tuple[1])
-        self.type = type
         self.state = 0
         self.has_been_pressed = False
+        self.offset = offset # Offset from first button image from all the images
 
     def draw(self:object, screen:pygame.Surface):
         """Draws the button based on its type"""
-        if self.type == "play":
-            screen.blit(py_objs.buttons[self.state], (self.rect.x, self.rect.y))
-        elif self.type == "quit" or self.type == "submit" or self.type == "logout":
-            screen.blit(py_objs.buttons[self.state + 3], (self.rect.x, self.rect.y))
+        screen.blit(py_objs.buttons[self.state + self.offset], (self.rect.x, self.rect.y))
 
     def is_clicked(self:object):
         """Checks if button was pressed"""
         mouse_position = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_position):
             self.state = 1
+            
             if pygame.mouse.get_pressed()[0]:
                 self.state = 2      
                 self.has_been_pressed = True
+            
             elif self.has_been_pressed:
                 self.has_been_pressed = False
                 return True
@@ -352,6 +351,7 @@ class DropdownMenu:
             pygame.draw.rect(screen, conf.colors[self.color], self.rect, self.rect_border_width, 25)
             self.items_texts[0].draw(screen)
         
+        # Otherwise we draw the whole dropdown with all the elements
         else:
             pygame.draw.rect(screen, conf.colors[self.color], self.rect, self.rect_border_width, 0, 25, 25, 0, 0)
             pygame.draw.rect(screen, conf.colors["grey_dark"], self.selection_rect, 0, 0, 0, 0, 25, 25)
