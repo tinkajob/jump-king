@@ -608,9 +608,10 @@ def load_resources():
         buttons[i] = load_image(conf.button_images_paths[i], "other", resources_folder, conf.fallback_resources_folder, conf.button_load_sizes[i], True)
 
     scaled_bgs = []
-    for i in range(len(py_objs.bgs_images_paths)):
+    # We load all of the bgs images paths, if there are too few bgs specified, we duplicate the last one
+    for i in range(len(conf.level_paths)):
         scaled_bgs.append(None)
-        scaled_bgs[i] = load_image(py_objs.bgs_images_paths[i], "bgs", resources_folder, conf.fallback_resources_folder, (1778 * conf.bg_resize_koeficient, 1000 * conf.bg_resize_koeficient))
+        scaled_bgs[i] = load_image(py_objs.bgs_images_paths[min(i, len(py_objs.bgs_images_paths) - 1)], "bgs", resources_folder, conf.fallback_resources_folder, (1778 * conf.bg_resize_koeficient, 1000 * conf.bg_resize_koeficient))
 
     ui_bgs = {}
     for key, value in py_objs.ui_bgs_images_paths.items():

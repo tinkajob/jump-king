@@ -11,7 +11,7 @@
         "sewer",
         "sewer"
     ],
-    "COMMENT": "For the backgrounds you need to type in the name of the image you want for your level. (It needs to be in resources/bgs/)(Format (.png, .jpg, ...) wil be added automatically)",
+    "COMMENT": "For the backgrounds you need to type in the name of the image you want for your level. (It needs to be in resources/bgs/)(Format (.png, .jpg, ...) wil be added automatically). If you enter too few background, it will just duplicate the last background untill there are enogh backgrounds. If you enter too many backgrounds, it will use just the backgrounds that it needs",
     "game_backgrounds":[
         "bg0",
         "bg1", 
