@@ -4,7 +4,7 @@ import modules.platform as platform
 import modules.pygame_objects as py_objs
 import modules.objects as objs
 import modules.config as conf
-# from modules.config import SUPPORTED_IMAGE_FORMATS
+from modules.config import SUPPORTED_IMAGE_FORMATS, SCREEN_WIDTH, SCREEN_HEIGHT, fallback_resources_folder
 
 # MISCELANEOUS
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, stats:list):
@@ -154,29 +154,50 @@ def autotile(neighbors:list):
         return 46
     return 0 #prepisi da bo ku binary tree?
 
-def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite_dir:bool = True, offset:tuple [int, int] = (0, 0)):
+def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite_dir:bool = True, manual_offset:tuple [int, int] = (0, 0)):
     """Returns tuple containing positions for images to offset background"""
     
     bg_pos = [0, 0]
-    if bg_image.get_width() / conf.SCREEN_WIDTH > bg_image.get_height() / conf.SCREEN_HEIGHT:
-        displacement_koeficient = (bg_image.get_height() - conf.SCREEN_HEIGHT) / conf.SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
+    image_width, image_height = bg_image.get_size()
+    
+    if image_width / SCREEN_WIDTH > image_height / SCREEN_HEIGHT:
+        displacement_koeficient = (image_height - SCREEN_HEIGHT) / SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
     else:
-        displacement_koeficient = (bg_image.get_width() - conf.SCREEN_WIDTH) / conf.SCREEN_WIDTH
+        displacement_koeficient = (image_width - SCREEN_WIDTH) / SCREEN_WIDTH
 
-    if not opposite_dir:
-        bg_pos[0] = (((bg_image.get_width() - conf.SCREEN_WIDTH) // 2) * -1) - (((conf.SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
-        bg_pos[1] = (((bg_image.get_height() - conf.SCREEN_HEIGHT) // 2) * -1) - (((conf.SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
+    # Coordinates where to draw image so that is centered
+    coordiante_for_center_x = ((image_width - SCREEN_WIDTH) / 2) * -1
+    coordiante_for_center_y = ((image_height - SCREEN_HEIGHT) / 2) * -1
+
+    # The actual displacements based on provided input
+    displacement_x = (SCREEN_WIDTH / 2 - input_pos[0]) * displacement_koeficient
+    displacement_y = (SCREEN_HEIGHT / 2 - input_pos[1]) * displacement_koeficient
+
+    if opposite_dir:
+        bg_pos[0] = coordiante_for_center_x + displacement_x + manual_offset[0]
+        bg_pos[1] = coordiante_for_center_y + displacement_y + manual_offset[1]
     else:
-        bg_pos[0] = (((bg_image.get_width() - conf.SCREEN_WIDTH) // 2) * -1) + (((conf.SCREEN_WIDTH / 2 - input_pos[0])) * displacement_koeficient) + (offset[0] / 2)
-        bg_pos[1] = (((bg_image.get_height() - conf.SCREEN_HEIGHT) // 2) * -1) + (((conf.SCREEN_HEIGHT / 2 - input_pos[1])) * displacement_koeficient) + (offset[1] / 2)
+        bg_pos[0] = coordiante_for_center_x - displacement_x + manual_offset[0]
+        bg_pos[1] = coordiante_for_center_y - displacement_y + manual_offset[1]
 
     return (bg_pos[0], bg_pos[1])
 
 def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0):
     """Handles drawing scenes"""
-
-    if scene == "main_menu":
-        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, (-300, 0)))
+    if scene == "login":
+        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, (-150, 0))) # The last tuple is manual offset
+        objs.submit_button.draw(screen)
+        objs.quit_button.draw(screen)
+        objs.username_input.draw(screen)
+        objs.password_input.draw(screen)
+        objs.submit_text.draw(screen)
+        objs.quit_text.draw(screen) # Za ta tekst naredi da se narise ze ku poklices button funkcijo (da je kar part od buttona)
+        objs.cursor.draw(screen, delta_time)
+        objs.campaign_dropdown.draw(screen)
+        objs.notification.draw(screen)
+    
+    elif scene == "main_menu":
+        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, (-150, 0))) # The last tuple is manual offset
         objs.play_button.draw(screen)
         objs.quit_button.draw(screen)
         objs.logout_button.draw(screen)
@@ -197,18 +218,6 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
     
     elif scene == "endscreen":
         screen.blit(ui_bgs["endscreen"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["endscreen"], False))
-        objs.notification.draw(screen)
-
-    elif scene == "login":
-        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, (-300, 0))) #(-600, 0)
-        objs.submit_button.draw(screen)
-        objs.quit_button.draw(screen)
-        objs.username_input.draw(screen)
-        objs.password_input.draw(screen)
-        objs.submit_text.draw(screen)
-        objs.quit_text.draw(screen) # Za ta tekst naredi da se narise ze ku poklices button funkcijo (da je kar part od buttona)
-        objs.cursor.draw(screen, delta_time)
-        objs.campaign_dropdown.draw(screen)
         objs.notification.draw(screen)
 
 # MANAGING PLAYER STATS
@@ -526,19 +535,29 @@ def set_config_values():
     py_objs.icon_name = config.get("icon")
     py_objs.babe_position = config.get("babe_position", [])
 
-def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resources_folder:str, size:tuple[int, int], preserve_alpha:bool = False, flip_x:bool = False, flip_y:bool = False):
+def find_background_load_size(image:pygame.surface.Surface, bg_resize_koeficient:float = 1):
+    """Find image size in order to fit the whole screen"""
+    image_size = image.get_size()
+
+    # Ratios between width and height
+    scale = max(SCREEN_WIDTH / image_size[0], SCREEN_HEIGHT / image_size[1])
+    size = (image_size[0] * scale * bg_resize_koeficient, image_size[1] * scale * bg_resize_koeficient)
+
+    return size
+
+def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resources_folder:str, size:tuple[int, int] = [], preserve_alpha:bool = False, auto_scale:bool = False, flip_x:bool = False, flip_y:bool = False):
     path = os.path.join(resources_folder, subfolder, filepath)
     fallback_path = os.path.join(fallback_resources_folder, subfolder, filepath)
     found_image = False
 
-    for format in conf.SUPPORTED_IMAGE_FORMATS:
+    for format in SUPPORTED_IMAGE_FORMATS:
         current_path = path + format
         if os.path.exists(current_path):
             image = pygame.transform.flip(pygame.image.load(current_path), flip_x, flip_y)
             found_image = True
 
     if not found_image:
-        for format in conf.SUPPORTED_IMAGE_FORMATS:
+        for format in SUPPORTED_IMAGE_FORMATS:
             current_path = fallback_path + format
             if os.path.exists(current_path):
                 image = pygame.transform.flip(pygame.image.load(current_path), flip_x, flip_y)
@@ -547,8 +566,12 @@ def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resou
     if not found_image:
         print("Couldn't load image")
         return
-
-    if size[0] != 0 and size[1] != 0:
+    
+    # If we are given a list of sizes we use this, otherwise if we want to auto scale we call find_background_load_size(). If non of the above we leave default size
+    if not size and auto_scale:
+        size = find_background_load_size(image, conf.bg_resize_koeficient)
+        
+    if size:
         image = pygame.transform.scale(image, size)
 
     if preserve_alpha:
@@ -590,40 +613,40 @@ def load_resources():
     tile_images = []
     for i in range(len(conf.tile_images_paths)):
         tile_images.append(None)
-        tile_images[i] = load_image(conf.tile_images_paths[i], "tiles", resources_folder, conf.fallback_resources_folder, (conf.tile_size, conf.tile_size), True)
+        tile_images[i] = load_image(conf.tile_images_paths[i], "tiles", resources_folder, fallback_resources_folder, (conf.tile_size, conf.tile_size), True)
 
     player_images = []
     for i in range(len(conf.player_images_paths)):
         player_images.append(None)
-        player_images[i] = load_image(conf.player_images_paths[i], "player_animation", resources_folder, conf.fallback_resources_folder, (80, 80), True)
+        player_images[i] = load_image(conf.player_images_paths[i], "player_animation", resources_folder, fallback_resources_folder, (80, 80), True)
 
     babe_images = []
     for i in range(len(conf.babe_images_paths)):
         babe_images.append(None)
-        babe_images[i] = load_image(conf.babe_images_paths[i], "babe_animation", resources_folder, conf.fallback_resources_folder, (80, 80), True)
+        babe_images[i] = load_image(conf.babe_images_paths[i], "babe_animation", resources_folder, fallback_resources_folder, (80, 80), True)
 
     buttons = []
     for i in range(len(conf.button_images_paths)):
         buttons.append(None)
-        buttons[i] = load_image(conf.button_images_paths[i], "other", resources_folder, conf.fallback_resources_folder, conf.button_load_sizes[i], True)
+        buttons[i] = load_image(conf.button_images_paths[i], "other", resources_folder, fallback_resources_folder, conf.button_load_sizes[i], True)
 
     scaled_bgs = []
     # We load all of the bgs images paths, if there are too few bgs specified, we duplicate the last one
     for i in range(len(conf.level_paths)):
         scaled_bgs.append(None)
-        scaled_bgs[i] = load_image(py_objs.bgs_images_paths[min(i, len(py_objs.bgs_images_paths) - 1)], "bgs", resources_folder, conf.fallback_resources_folder, (1778 * conf.bg_resize_koeficient, 1000 * conf.bg_resize_koeficient))
+        scaled_bgs[i] = load_image(py_objs.bgs_images_paths[min(i, len(py_objs.bgs_images_paths) - 1)], "bgs", resources_folder, fallback_resources_folder, (), False, True)
 
     ui_bgs = {}
     for key, value in py_objs.ui_bgs_images_paths.items():
-        ui_bgs[key] = load_image(value, "bgs", resources_folder, conf.fallback_resources_folder, conf.ui_bgs_sizes[key])
+        ui_bgs[key] = load_image(value, "bgs", resources_folder, fallback_resources_folder, (), False, True) #conf.ui_bgs_sizes[key]
 
     sfx = {}
     for i in range(len(conf.sfx_keys)):
-        sfx[conf.sfx_keys[i]] = load_sfx(conf.sfx_keys[i], "sfx", ".wav", resources_folder, conf.fallback_resources_folder)
+        sfx[conf.sfx_keys[i]] = load_sfx(conf.sfx_keys[i], "sfx", ".wav", resources_folder, fallback_resources_folder)
 
     fonts = {}# os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf")
     for i in range(len(conf.fonts_keys)):
-        fonts[conf.fonts_keys[i]] = load_font(os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf"), os.path.join(conf.fallback_resources_folder, "other", conf.fonts_names[i] + ".otf"), conf.fonts_sizes[i])
+        fonts[conf.fonts_keys[i]] = load_font(os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf"), os.path.join(fallback_resources_folder, "other", conf.fonts_names[i] + ".otf"), conf.fonts_sizes[i])
 
     detect_levels()
     make_levels(tile_images)
