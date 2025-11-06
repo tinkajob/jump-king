@@ -8,31 +8,33 @@ class PlayerController:
     def __init__(self:object, x_pos:int, y_pos:int, size:int):
         """Creates a player object"""
         self.rect = pygame.Rect(x_pos, y_pos, 60, 69)
-        self.collision_top_rect = pygame.Rect(x_pos + 9, y_pos - 1, 42, 1) # okej
-        self.collision_bottom_rect = pygame.Rect(x_pos + 5, y_pos + size, 50, 1) #okej
+        self.collision_top_rect = pygame.Rect(x_pos + 9, y_pos - 1, 42, 1)
+        self.collision_bottom_rect = pygame.Rect(x_pos + 5, y_pos + size, 50, 1)
         self.collision_left_rect = pygame.Rect(x_pos - 1, y_pos + 5, 1, size - 34)
         self.collision_right_rect = pygame.Rect(x_pos + size, y_pos + 5, 1, size - 34)
         self.speed_y = self.speed_x = 0
-        self.touched_floor = False
+        self.current_frame, self.running_frames = 9, 0
         self.jump_charge = 0
+        self.times_bounced_midair = 0 # za fall in animation
+        self.jumped_from_level = 0
+        self.jumped_from_y = 0
+        self.time_since_pressed_left, self.time_since_pressed_right = 0.0, 0.0
+        self.time_charged = 0
+        self.end_animation_distance_travelled = 0
+        self.friction = 1
+        self.direction = ""
+        self.is_not_allowed_to_move = ""
+        self.touched_floor = False
         self.jump_key_pressed = False
         self.has_fallen = False
-        self.current_frame, self.running_frames = 9, 0
         self.collisions = [False, False, False, False] #up, down, right, left
-        self.direction = ""
         self.has_hit_wall_midair = False
-        self.is_not_allowed_to_move = ""
         self.has_collided_prev_frame, self.has_collided_this_frame = True, False # za sfx, bo se za pristat
-        self.times_bounced_midair = 0 # za fall in animation
         self.fell = True
-        self.jumped_from_y = 0
-        self.jumped_from_level = 0
         self.head_bounce = False
         self.has_received_input = False
-        self.time_since_pressed_left, self.time_since_pressed_right = 0.0, 0.0
         self.can_move = True
-        self.time_charged = 0
-        self.friction = 1
+        self.is_in_end_animation = False
 
     def draw(self:object, screen:pygame.Surface):
         """Draws the player on the screen"""
@@ -46,20 +48,26 @@ class PlayerController:
         self.rect.x = x_pos
         self.rect.y = y_pos
 
-    def animate(self:object, keys:list, delta_time:float):
+    def animate(self:object, keys:list = [], delta_time:float = 0, end_animation:bool = False):
         """Sets the correct frame for the player object to draw"""
+
+        if self.speed_x != 0 and self.touched_floor:
+            self.running_frames += delta_time
+            if self.running_frames > 0.65:
+                self.running_frames -= 0.65
+            self.current_frame = math.floor(self.running_frames * 6.15)
+
+        if end_animation:
+            if self.speed_x == 0:
+                self.current_frame = 0
+            return
+
         if self.speed_x == 0:
             if (not any(keys)) or ((keys[pygame.K_LEFT] or keys[pygame.K_a]) and (keys[pygame.K_RIGHT] or keys[pygame.K_d])):
                 self.current_frame = 0
             if keys[pygame.K_UP] or keys[pygame.K_w] or keys[pygame.K_SPACE]:
                 self.current_frame = 5
                 
-        if self.speed_x != 0 and self.touched_floor:
-            self.running_frames += delta_time
-            if self.running_frames > 0.65:
-                self.running_frames -= 0.65
-            self.current_frame = math.floor(self.running_frames * 6.15)
-            
         if self.speed_y < 0:
             self.current_frame = 6
             
@@ -342,9 +350,43 @@ class PlayerController:
                         self.times_bounced_midair += 1
                     return
 
-    def get_center_pos(self:object):
+    def get_rect(self:object):
+        return self.rect
+
+    def get_pos(self:object, center_pos:bool = False):
         """Returns current player position"""
-        return self.rect.center
+        if center_pos:
+            return self.rect.center
+
+        return self.rect.topleft
+
+    def manage_end_animation(self:object, babe_pos:tuple[int, int] = (0, 0), delta_time:float = 0, first_frame:bool = False, stop:bool = False):
+        """Manual animation when game is ending"""
+
+        if stop:
+            self.speed_x = 0
+            self.is_in_animation = False
+            return
+
+        # If this is the first frame of animation
+        if first_frame:
+            self.is_in_end_animation = True
+            self.can_move = False
+            self.rect.y = babe_pos[1] + 10
+            self.touched_floor = True
+            self.current_frame = 0
+            self.direction = "right"
+            self.speed_x = 100
+            return
+
+        # After we've set all up in the first frame
+        if self.is_in_end_animation:
+            movement_x = self.speed_x * delta_time
+            self.speed_y = 0
+            self.rect.x += movement_x
+            self.end_animation_distance_travelled += movement_x
+            
+            self.animate(delta_time = delta_time, end_animation = True)
 
     def reset_values(self:object):
         """Resets all player values"""
@@ -367,3 +409,5 @@ class PlayerController:
         self.has_received_input = False
         self.can_move = True
         self.time_charged = 0
+        self.is_in_end_animation = False
+        self.end_animation_distance_travelled = 0

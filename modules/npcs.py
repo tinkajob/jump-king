@@ -8,31 +8,77 @@ class BabeController:
     def __init__(self:object, x_pos:int, y_pos:int, size:int):
         """Creates a babe object *(finish)*"""
         self.rect = pygame.Rect(x_pos, y_pos, size, size)
+        self.player_collision_rect = pygame.rect.Rect(x_pos - 80, y_pos, size + 80, size)
         self.current_frame, self.jumping_frame = 0, 0
         self.is_visible = False
+        self.end_animation_status = ""
+        self.current_frame = 0
+        self.first_time_end_animation_called = True
 
-    def draw(self:object, screen:pygame.Surface, current_level:int, delta_time:float):
+    def draw(self:object, screen:pygame.Surface, current_level:int):
         """Draws babe if the last level is shown"""
         if current_level == len(conf.level_paths) - 1:
             self.is_visible = True
-            screen.blit(py_objs.babe_images[self.animate(delta_time)], (self.rect.x, self.rect.y))
+            screen.blit(py_objs.babe_images[self.current_frame], (self.rect.x, self.rect.y))
         else:
             self.is_visible = False
         
-    def animate(self:object, delta_time:float):
+    def animate(self:object, delta_time:float = 0):
         """Sets the correct frame to draw"""
+
+        # How we animate end animation
+        if self.end_animation_status == "started":
+            self.current_frame = 0
+            return
+        
+        # At the end we do one aditional jump
+        if self.end_animation_status == "end":
+            if self.first_time_end_animation_called:
+                self.jumping_frame = 0
+                self.first_time_end_animation_called = False
+
+            self.jumping_frame += delta_time
+            self.current_frame = math.floor(self.jumping_frame * 6.660)
+
+            if self.current_frame == 0:
+                self.rect.y -= 50 * delta_time
+
+            if self.current_frame == 2:
+                self.rect.y += 50 * delta_time
+
+            if self.current_frame >= len(py_objs.babe_images):
+                self.current_frame = 0
+            return
+
         self.jumping_frame += delta_time
         if self.jumping_frame > 0.45: # ta stevilka
             self.jumping_frame -= 0.45
         self.current_frame = math.floor(self.jumping_frame * 6.660) % len(py_objs.babe_images) #in ta stevilka zmnozene morejo bit enake (oz. piko manjse) kukr je st. frameov animacije, zdej je uredi
-        return self.current_frame
 
-    def check_for_ending(self:object, player:object):
+    def reset(self:object):
+        self.end_animation_status = ""
+        self.current_frame, self.jumping_frame = 0, 0
+        self.is_visible = False
+        self.first_time_end_animation_called = True
+
+    def check_for_ending(self:object, player_rect:pygame.rect.Rect):
         """Checks whether the player collides with the babe"""
-        if self.rect.colliderect(player.rect) and self.is_visible:
-           return True
-        return False
+        if not self.is_visible:
+            return ""
+
+        if self.rect.colliderect(player_rect):
+           self.end_animation_status = "end"
+           return "end_game"
+
+        if self.player_collision_rect.colliderect(player_rect):
+            self.end_animation_status = "started"
+            return "start_animation"
+        
+        return ""
     
+    def get_pos(self:object):
+        return self.rect.topleft
+
     def get_middle_platform_position(self:object, platform, tile_size):
         # We find the middle of the platform, then we offset it for the half of babe size
         x_pos = platform[0].rect.x + (len(platform) * tile_size) / 2 - self.rect.width / 2

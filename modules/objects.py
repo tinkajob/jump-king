@@ -12,7 +12,7 @@ utils.make_levels(py_objs.tile_images)
 level = levels[conf.current_level]
 
 player = player.PlayerController(conf.SCREEN_WIDTH / 2 - conf.player_size / 2, 891, conf.player_size)
-main_babe = npcs.BabeController(1200, 160, conf.player_size)
+babe = npcs.BabeController(1200, 160, conf.player_size)
 
 game_music = music.MusicController()
 effect = ui.FadeManager(conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT)

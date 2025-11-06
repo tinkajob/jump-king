@@ -195,7 +195,7 @@ while conf.WINDOW_OPEN:
 
     if not conf.QUITTING_GAME:
         # That's commented out just because for now we set campaign on the login screen
-        objs.main_babe.find_position(py_objs.babe_position, objs.levels[len(objs.levels) - 1], conf.tile_size, conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT) # Find babe position based on config file or automatically
+        objs.babe.find_position(py_objs.babe_position, objs.levels[len(objs.levels) - 1], conf.tile_size, conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT) # Find babe position based on config file or automatically
     py_objs.clock.tick()
 
     while conf.GAME_RUNNING:
@@ -221,6 +221,8 @@ while conf.WINDOW_OPEN:
 
         if objs.player.can_move:
             objs.level, conf.current_level = objs.player.move(delta_time, keys)
+        objs.player.manage_end_animation(delta_time = delta_time)
+        objs.babe.animate(delta_time)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -230,15 +232,14 @@ while conf.WINDOW_OPEN:
                 objs.effect.start_fade_out()
                 conf.next_scene = "quit"
 
-        if objs.main_babe.check_for_ending(objs.player) and not conf.game_ended:
+        if not objs.babe.end_animation_status == "started" and objs.babe.check_for_ending(objs.player.get_rect()) == "start_animation":
+            objs.player.manage_end_animation(objs.babe.get_pos(), first_frame = True)
+        
+        if objs.babe.check_for_ending(objs.player.get_rect()) == "end_game" and not conf.game_ended and conf.next_scene != "endscreen":
             conf.next_scene = "endscreen"
             objs.effect.start_fade_out()
             conf.stats["games_played"] += 1
-            objs.player.can_move = False
-            objs.player.rect.y = objs.main_babe.rect.y + 10
-            objs.player.rect.x = objs.main_babe.rect.x - 80
-            objs.player.current_frame = 0
-            objs.player.direction = "right"
+            objs.player.manage_end_animation(delta_time = 0, stop = True)
             objs.game_music.play_fadeout()
             conf.can_play_music = False
 
@@ -246,10 +247,10 @@ while conf.WINDOW_OPEN:
             objs.game_music.play_level(conf.current_level)
 
         if conf.next_scene == "endscreen" and not objs.effect.get_active():
-            conf.can_play_music = False
-            conf.ENDSCREEN = True
             conf.GAME_RUNNING = False
+            conf.ENDSCREEN = True
             conf.game_ended = True
+            conf.can_play_music = False
 
         if conf.next_scene == "quit" and not objs.effect.get_active():
             conf.GAME_RUNNING = False
@@ -272,6 +273,8 @@ while conf.WINDOW_OPEN:
         pygame.mixer.music.stop()
         conf.current_menu = "endscreen"
     objs.game_music.play_menu(conf.current_menu)
+
+    objs.babe.reset()
 
     objs.notification.delete_notification()
     objs.notification.show_notification(conf.messages["endscreen"])

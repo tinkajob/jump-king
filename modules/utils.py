@@ -160,8 +160,9 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
     bg_pos = [0, 0]
     image_width, image_height = bg_image.get_size()
     
+    # We check in which direction image fits tighter (smaller overflow %) and use the tighter direction to calculate displacement_koeficient
     if image_width / SCREEN_WIDTH > image_height / SCREEN_HEIGHT:
-        displacement_koeficient = (image_height - SCREEN_HEIGHT) / SCREEN_HEIGHT #should automatically set correct koeficient so that the bg doesnt move too much
+        displacement_koeficient = (image_height - SCREEN_HEIGHT) / SCREEN_HEIGHT
     else:
         displacement_koeficient = (image_width - SCREEN_WIDTH) / SCREEN_WIDTH
 
@@ -173,19 +174,24 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
     displacement_x = (SCREEN_WIDTH / 2 - input_pos[0]) * displacement_koeficient
     displacement_y = (SCREEN_HEIGHT / 2 - input_pos[1]) * displacement_koeficient
 
+    # We calculate actual image coordinates
     if opposite_dir:
-        bg_pos[0] = coordiante_for_center_x + displacement_x + manual_offset[0]
-        bg_pos[1] = coordiante_for_center_y + displacement_y + manual_offset[1]
+        bg_pos[0] = coordiante_for_center_x + displacement_x 
+        bg_pos[1] = coordiante_for_center_y + displacement_y
     else:
-        bg_pos[0] = coordiante_for_center_x - displacement_x + manual_offset[0]
-        bg_pos[1] = coordiante_for_center_y - displacement_y + manual_offset[1]
+        bg_pos[0] = coordiante_for_center_x - displacement_x
+        bg_pos[1] = coordiante_for_center_y - displacement_y
 
-    return (bg_pos[0], bg_pos[1])
+    # If given, we manually offset image (if not given it's (0, 0))
+    bg_pos[0] += manual_offset[0]
+    bg_pos[1] += manual_offset[1]
+
+    return bg_pos
 
 def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0):
     """Handles drawing scenes"""
     if scene == "login":
-        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, (-150, 0))) # The last tuple is manual offset
+        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, manual_offset = (-150, 0)))
         objs.submit_button.draw(screen)
         objs.quit_button.draw(screen)
         objs.username_input.draw(screen)
@@ -197,7 +203,7 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objs.notification.draw(screen)
     
     elif scene == "main_menu":
-        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, (-150, 0))) # The last tuple is manual offset
+        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, manual_offset = (-150, 0)))
         objs.play_button.draw(screen)
         objs.quit_button.draw(screen)
         objs.logout_button.draw(screen)
@@ -208,10 +214,10 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objs.notification.draw(screen)
 
     elif scene == "running":
-        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objs.player.get_center_pos(), scaled_bgs[current_level]))
+        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objs.player.get_pos(center_pos = True), scaled_bgs[current_level]))
         screen.blit(objs.level_surfaces[current_level], (0, 0))
         objs.player.draw(screen)
-        objs.main_babe.draw(screen, current_level, delta_time)
+        objs.babe.draw(screen, current_level)
         objs.timer_text.draw(screen)
         objs.FPS_text.draw(screen)
         objs.notification.draw(screen)
