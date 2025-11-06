@@ -362,7 +362,6 @@ class PlayerController:
 
     def manage_end_animation(self:object, babe_pos:tuple[int, int] = (0, 0), delta_time:float = 0, first_frame:bool = False, stop:bool = False):
         """Manual animation when game is ending"""
-
         if stop:
             self.speed_x = 0
             self.is_in_animation = False

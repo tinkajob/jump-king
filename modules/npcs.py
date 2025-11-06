@@ -1,6 +1,7 @@
 import pygame, math
 
 import modules.config as conf
+from modules.config import tile_size, babe_min_row_length
 import modules.pygame_objects as py_objs
 import modules.utils as utils
 
@@ -8,7 +9,7 @@ class BabeController:
     def __init__(self:object, x_pos:int, y_pos:int, size:int):
         """Creates a babe object *(finish)*"""
         self.rect = pygame.Rect(x_pos, y_pos, size, size)
-        self.player_collision_rect = pygame.rect.Rect(x_pos - 80, y_pos, size + 80, size)
+        self.player_collision_rect = pygame.rect.Rect(x_pos - (babe_min_row_length * tile_size - size), y_pos, size + (babe_min_row_length * tile_size - size), size)
         self.current_frame, self.jumping_frame = 0, 0
         self.is_visible = False
         self.end_animation_status = ""
@@ -79,9 +80,9 @@ class BabeController:
     def get_pos(self:object):
         return self.rect.topleft
 
-    def get_middle_platform_position(self:object, platform, tile_size):
-        # We find the middle of the platform, then we offset it for the half of babe size
-        x_pos = platform[0].rect.x + (len(platform) * tile_size) / 2 - self.rect.width / 2
+    def get_correct_platform_position(self:object, platform):
+        # We position babe on the right side of the platform
+        x_pos = platform[0].rect.x + (len(platform) * tile_size) - self.rect.width
 
         # We just set it to the y value of platform, then offset by babe size
         y_pos = platform[0].rect.y - self.rect.height
@@ -123,9 +124,7 @@ class BabeController:
         # If there is position specified in config.json, we use that,
         # otherwise we auto-position babe (highest suitable platoform)
         
-        # Suitable platform: min length 2, above at least 3 tiles free
-        
-        min_row_length = 2
+        # Suitable platform: long at least (babe_min_rowh_lenght) tiles, above at least 3 tiles free
         
         # If position is specified in config.json, we use those values
         if config_pos:
@@ -134,9 +133,9 @@ class BabeController:
             return
 
         # Otherwise we auto_position babe (if there are any suitable platforms):
-        suitable_platforms = self.auto_position_on_last_level(last_level, tile_size, min_row_length)
+        suitable_platforms = self.auto_position_on_last_level(last_level, tile_size, babe_min_row_length)
         if suitable_platforms:
-            self.rect.x, self.rect.y = self.get_middle_platform_position(suitable_platforms[0], tile_size)
+            self.rect.x, self.rect.y = self.get_correct_platform_position(suitable_platforms[0])
             return
 
         # If there are no suitable platforms for babe we just draw it in the middle of the screen

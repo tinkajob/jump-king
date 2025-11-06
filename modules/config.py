@@ -66,6 +66,7 @@ loaded_player_stats = False
 gravity, jump_power, bounce_power = 30, -17, -17
 player_size, max_speed = 80, 4
 PLAYER_NAME = ""
+babe_min_row_length = 5
 #============================= PLAYER & ENTITIES =============================
 
 #============================= SOUND =============================
