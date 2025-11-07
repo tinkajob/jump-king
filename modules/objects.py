@@ -16,7 +16,7 @@ player = player.PlayerController(conf.SCREEN_WIDTH / 2 - conf.player_size / 2, 8
 babe = npcs.BabeController(1200, 160, conf.player_size)
 
 game_music = music.MusicController()
-effect = ui.FadeManager(conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT)
+effect = ui.EffectManager(conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT)
 
 play_button = ui.Button(conf.coordinates["play_button"], conf.sizes["play_button"])
 quit_button = ui.Button(conf.coordinates["quit_button"], conf.sizes["quit_button"], 3)
@@ -34,8 +34,6 @@ logout_text = ui.Text("Logout", "white", "normal", logout_button.rect.center)
 FPS_text = ui.Text("000", "grey_dark", "timer", (conf.SCREEN_WIDTH - 60,15))
 timer_text = ui.Text("0:00:00", "grey_dark", "timer", (50, 15))
 
-cursor = ui.Cursor((0, 0), (4, 36))
-
 notification = ui.Notification(((conf.SCREEN_WIDTH / 2) - 300, 800), (600, 150), "{Notification message}")
 
 # We input all possible options to choose from when we define a dropdown menu
@@ -44,4 +42,4 @@ campaigns_list.remove("levels")
 campaign_dropdown = ui.DropdownMenu(conf.coordinates["campaigns_dropdown"], conf.sizes["campaigns_dropdown"], campaigns_list)
 
 # Importance order for UI elements (topmost drawn last)
-login_ui_elements = [notification, campaign_dropdown, cursor, username_input, password_input, submit_button, quit_button, submit_text, quit_text]
+login_ui_elements = [notification, campaign_dropdown, username_input, password_input, submit_button, quit_button, submit_text, quit_text]

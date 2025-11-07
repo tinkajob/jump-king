@@ -188,18 +188,50 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
 
     return bg_pos
 
-def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0):
+def detect_click(object: object, events: list[pygame.event.Event], mouse_pos: tuple[int, int]) -> bool:
+    """Detects a true click — pressed inside and released inside the same rect."""
+    clicked = False
+
+    for event in events:
+        # If the mouse is pressed we check whether it was inside
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            object.mouse_down_inside = object.rect.collidepoint(mouse_pos)
+        
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if getattr(object, "mouse_down_inside", False) and object.rect.collidepoint(mouse_pos):
+                clicked = True
+            object.mouse_down_inside = False
+
+    return clicked
+
+def set_permission_to_interact(mouse_pos:tuple[int, int], ui_elements:list):
+    # List of all elements that have colliding point (are overlapping) on that point 
+    colliding_elements = []
+
+    # If item collides we add it to list of colliding points and disable it
+    for object in ui_elements:
+        if object.rect.collidepoint(mouse_pos):
+            colliding_elements.append(object)
+            object.interactable = False
+            print(f"colliding with: {object}")
+        else:
+            object.interactable = True
+
+    if colliding_elements:
+        colliding_elements[0].interactable = True
+
+def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0, events = []):
     """Handles drawing scenes"""
     if scene == "login":
         screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, manual_offset = (-150, 0)))
         objs.submit_button.draw(screen)
         objs.quit_button.draw(screen)
-        objs.username_input.draw(screen)
-        objs.password_input.draw(screen)
+        objs.username_input.draw(screen, delta_time)
+        objs.password_input.draw(screen, delta_time)
         objs.submit_text.draw(screen)
         objs.quit_text.draw(screen) # Za ta tekst naredi da se narise ze ku poklices button funkcijo (da je kar part od buttona)
-        objs.cursor.draw(screen, delta_time)
-        objs.campaign_dropdown.draw(screen)
+        # objs.cursor.draw(screen, delta_time)
+        objs.campaign_dropdown.draw(screen, events)
         objs.notification.draw(screen)
     
     elif scene == "main_menu":
