@@ -3,7 +3,8 @@ import pygame, math
 import modules.config as conf
 from modules.config import tile_size, babe_min_row_length
 import modules.pygame_objects as py_objs
-import modules.utils as utils
+
+from modules.utils import slice_level, find_valid_subrows
 
 class BabeController:
     def __init__(self:object, x_pos:int, y_pos:int, size:int):
@@ -91,7 +92,7 @@ class BabeController:
 
     def auto_position_on_last_level(self:object, last_level:list, tile_size:int, min_row_length:int):
         # First we slice level into horizontal platforms
-        level_rows = utils.slice_level(last_level, tile_size, min_row_length)
+        level_rows = slice_level(last_level, tile_size, min_row_length)
         suitable_platforms = []
 
         # When we have all the rows we check each platforms if it's suitable for babe to stand on
@@ -108,7 +109,7 @@ class BabeController:
                 continue
             
             # If the platform collides with any other previous platform, we add any suitable subrows manually, and we skip that platform
-            valid_subrows = utils.find_valid_subrows(tiles, level_rows, platform_index, platform_area, min_row_length)
+            valid_subrows = find_valid_subrows(tiles, level_rows, platform_index, platform_area, min_row_length)
             
             # If the platform doesn't collide with any other, the whole platform is returned, otherwise we return list of all subrows, siutable for babe
             if tiles != valid_subrows:
@@ -141,4 +142,3 @@ class BabeController:
         # If there are no suitable platforms for babe we just draw it in the middle of the screen
         self.rect.centerx = SCREEN_WIDTH / 2
         self.rect.centery = SCREEN_HEIGHT / 2
-            

@@ -1,14 +1,15 @@
 import modules.config as conf
 import modules.player_controller as player
 import modules.npcs as npcs
-import modules.utils as utils
 import modules.music as music
 import modules.ui as ui
 import modules.pygame_objects as py_objs
 
+from modules.utils import detect_levels, make_levels, list_current_folder
+
 levels, level_surfaces = [], []
-utils.detect_levels()
-utils.make_levels(py_objs.tile_images)
+detect_levels()
+make_levels(py_objs.tile_images)
 level = levels[conf.current_level]
 
 player = player.PlayerController(conf.SCREEN_WIDTH / 2 - conf.player_size / 2, 891, conf.player_size)
@@ -38,9 +39,9 @@ cursor = ui.Cursor((0, 0), (4, 36))
 notification = ui.Notification(((conf.SCREEN_WIDTH / 2) - 300, 800), (600, 150), "{Notification message}")
 
 # We input all possible options to choose from when we define a dropdown menu
-path, campaigns_list, files = utils.list_current_folder(conf.campaigns_folder) # We don't actually need path and files, it's just because the function returns those
+path, campaigns_list, files = list_current_folder(conf.campaigns_folder) # We don't actually need path and files, it's just because the function returns those
 campaigns_list.remove("levels")
 campaign_dropdown = ui.DropdownMenu(conf.coordinates["campaigns_dropdown"], conf.sizes["campaigns_dropdown"], campaigns_list)
 
 # Importance order for UI elements (topmost drawn last)
-# login_ui_elements = [notification, campaign_dropdown, cursor, username_input, password_input, submit_button, quit_button, submit_text, quit_text]
+login_ui_elements = [notification, campaign_dropdown, cursor, username_input, password_input, submit_button, quit_button, submit_text, quit_text]
