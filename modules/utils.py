@@ -4,7 +4,9 @@ import modules.platform as platform
 import modules.pygame_objects as py_objs
 import modules.objects as objs
 import modules.config as conf
-from modules.config import SUPPORTED_IMAGE_FORMATS, SCREEN_WIDTH, SCREEN_HEIGHT, fallback_resources_folder
+
+# For the values that don't change values during game we use this import (a bit faster)
+from modules.config import SUPPORTED_IMAGE_FORMATS, SCREEN_WIDTH, SCREEN_HEIGHT, fallback_resources_folder, stats_folder, def_stats, campaigns_folder, messages, tile_size, bg_resize_koeficient, tile_images_paths, player_images_paths, babe_images_paths, button_images_paths
 
 # MISCELANEOUS
 def log_in(username:str, password:str, title:str, effect:object, username_input:str, password_input:str, stats:list):
@@ -243,7 +245,7 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
 # MANAGING PLAYER STATS
 def save_player_stats(PLAYER_NAME:str, saving_reason:str = ""):
     """Saves player stats to its corresponding file"""
-    os.makedirs(conf.stats_folder, exist_ok=True)
+    os.makedirs(stats_folder, exist_ok=True)
     
     if saving_reason == "game_ended":
         update_player_stats()
@@ -251,9 +253,9 @@ def save_player_stats(PLAYER_NAME:str, saving_reason:str = ""):
         update_player_stats(True)
 
     if PLAYER_NAME != "":
-        filepath = os.path.join(conf.stats_folder, f"{PLAYER_NAME}_stats.json")
+        filepath = os.path.join(stats_folder, f"{PLAYER_NAME}_stats.json")
     else:
-        filepath = os.path.join(conf.stats_folder, "guest_stats.json")
+        filepath = os.path.join(stats_folder, "guest_stats.json")
     
     with open(filepath, "w") as file:
         json.dump(conf.stats, file, indent = 4)
@@ -264,9 +266,9 @@ def load_player_stats(PLAYER_NAME:str):
     is_new_player = False
 
     if PLAYER_NAME != "":
-        filepath = os.path.join(conf.stats_folder, f"{PLAYER_NAME}_stats.json")
+        filepath = os.path.join(stats_folder, f"{PLAYER_NAME}_stats.json")
     else:
-        filepath = os.path.join(conf.stats_folder, "guest_stats.json")
+        filepath = os.path.join(stats_folder, "guest_stats.json")
 
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
@@ -275,19 +277,19 @@ def load_player_stats(PLAYER_NAME:str):
         conf.stats.update(loaded_stats)
     else:
         # If the player's stats file doesn't exist (new player)
-        for stat in conf.def_stats:
-            conf.stats[stat] = conf.def_stats[stat]
+        for stat in def_stats:
+            conf.stats[stat] = def_stats[stat]
             is_new_player = True
     
     #ce trenutno v stats.json ni neke vrednosti (smo na novo uvedli/ponesreci zbrisana), jo nastavimo na fallback vrednost
-    for key, value in conf.def_stats.items():
+    for key, value in def_stats.items():
         if key not in conf.stats:
             conf.stats[key] = value
     
     return is_new_player
 
 def wipe_stats(PLAYER_NAME:str, stats:list, def_stats:list):
-    """Resets all player values to 0 and saves them"""
+    """Resets all player values to value in def_stats and saves them"""
     for stat in stats:
         stats[stat] = def_stats[stat]
     save_player_stats(PLAYER_NAME, stats)
@@ -350,15 +352,15 @@ def detect_levels():
     conf.level_paths = []
 
     if conf.CAMPAIGN != "":
-        filepath = os.path.join(conf.campaigns_folder, conf.CAMPAIGN, "levels")
+        filepath = os.path.join(campaigns_folder, conf.CAMPAIGN, "levels")
     else:
-        filepath = os.path.join(conf.campaigns_folder, "levels")
+        filepath = os.path.join(campaigns_folder, "levels")
 
     root, dirs, files = list_current_folder(filepath)
     
     if not files:
-        print(conf.messages["err_empty_campaign"])
-        filepath = os.path.join(conf.campaigns_folder, "levels")
+        print(messages["err_empty_campaign"])
+        filepath = os.path.join(campaigns_folder, "levels")
         root, dirs, files = list_current_folder(filepath)
 
     for file in files:
@@ -400,12 +402,12 @@ def create_level(level_data:list):
                         neighbors.append(level_data[offset_row][offset_col])
                     else:
                         neighbors.append(0)
-                platforms.append(platform.Platform(col_index * conf.tile_size, row_index * conf.tile_size, conf.tile_size, conf.tile_size, autotile(neighbors)))
+                platforms.append(platform.Platform(col_index * tile_size, row_index * tile_size, tile_size, tile_size, autotile(neighbors)))
     return platforms 
 
 def create_level_surface(level:object, tile_images:list):
     """Creates level surface by combining all platforms/tiles into one surface"""
-    level_surface = pygame.Surface((conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT), pygame.SRCALPHA)
+    level_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 
     for platform in level:
         level_surface.blit(tile_images[platform.type], (platform.rect.x, platform.rect.y))
@@ -456,7 +458,7 @@ def find_valid_subrows(tiles:list, level_rows:list, platform_index:int, platform
         test_tiles = level_rows[testing_platform_index]
 
         # For each previous platform we create area, that the platform occupies
-        test_platform_area = pygame.rect.Rect(test_tiles[0].rect.x, test_tiles[0].rect.y, len(test_tiles) * conf.tile_size, conf.tile_size) # We create an area of platform
+        test_platform_area = pygame.rect.Rect(test_tiles[0].rect.x, test_tiles[0].rect.y, len(test_tiles) * tile_size, tile_size) # We create an area of platform
         
         # If the spaces collide we try searching for sub-area of the platform that is longer than min_row_length and not covered
         if platform_area.colliderect(test_platform_area):
@@ -467,7 +469,7 @@ def find_valid_subrows(tiles:list, level_rows:list, platform_index:int, platform
                 
                 # For each tile of the platform, we check all three tiles above it, 
                 # to see if any of those collides with current platform we are testing against
-                is_space_above_colliding = test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - conf.tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 2 * conf.tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 3 * conf.tile_size)
+                is_space_above_colliding = test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 2 * tile_size) or test_platform_area.collidepoint(tile_pos[0], tile_pos[1] - 3 * tile_size)
 
                 # If any of 3 above spaces is in the way, we add that tile to current_subrow of occupied tiles
                 if is_space_above_colliding:
@@ -537,9 +539,9 @@ def combine_subrows(occupied_subrows: list, platform:list, min_row_length:int):
 # LOADING GAME FILES
 def load_config():
     if conf.CAMPAIGN:
-        filepath = os.path.join(conf.campaigns_folder, conf.CAMPAIGN, "config.json")
+        filepath = os.path.join(campaigns_folder, conf.CAMPAIGN, "config.json")
     else:
-        filepath = os.path.join(conf.campaigns_folder, "config.json")
+        filepath = os.path.join(campaigns_folder, "config.json")
 
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
@@ -588,7 +590,7 @@ def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resou
     
     # If we are given a list of sizes we use this, otherwise if we want to auto scale we call find_background_load_size(). If non of the above we leave default size
     if not size and auto_scale:
-        size = find_background_load_size(image, conf.bg_resize_koeficient)
+        size = find_background_load_size(image, bg_resize_koeficient)
         
     if size:
         image = pygame.transform.scale(image, size)
@@ -630,24 +632,24 @@ def load_resources():
     conf.current_level = 0
 
     tile_images = []
-    for i in range(len(conf.tile_images_paths)):
+    for i in range(len(tile_images_paths)):
         tile_images.append(None)
-        tile_images[i] = load_image(conf.tile_images_paths[i], "tiles", resources_folder, fallback_resources_folder, (conf.tile_size, conf.tile_size), True)
+        tile_images[i] = load_image(tile_images_paths[i], "tiles", resources_folder, fallback_resources_folder, (tile_size, tile_size), True)
 
     player_images = []
-    for i in range(len(conf.player_images_paths)):
+    for i in range(len(player_images_paths)):
         player_images.append(None)
-        player_images[i] = load_image(conf.player_images_paths[i], "player_animation", resources_folder, fallback_resources_folder, (80, 80), True)
+        player_images[i] = load_image(player_images_paths[i], "player_animation", resources_folder, fallback_resources_folder, (80, 80), True)
 
     babe_images = []
-    for i in range(len(conf.babe_images_paths)):
+    for i in range(len(babe_images_paths)):
         babe_images.append(None)
-        babe_images[i] = load_image(conf.babe_images_paths[i], "babe_animation", resources_folder, fallback_resources_folder, (80, 80), True)
+        babe_images[i] = load_image(babe_images_paths[i], "babe_animation", resources_folder, fallback_resources_folder, (80, 80), True)
 
     buttons = []
-    for i in range(len(conf.button_images_paths)):
+    for i in range(len(button_images_paths)):
         buttons.append(None)
-        buttons[i] = load_image(conf.button_images_paths[i], "other", resources_folder, fallback_resources_folder, conf.button_load_sizes[i], True)
+        buttons[i] = load_image(button_images_paths[i], "other", resources_folder, fallback_resources_folder, conf.button_load_sizes[i], True)
 
     scaled_bgs = []
     # We load all of the bgs images paths, if there are too few bgs specified, we duplicate the last one
@@ -657,13 +659,13 @@ def load_resources():
 
     ui_bgs = {}
     for key, value in py_objs.ui_bgs_images_paths.items():
-        ui_bgs[key] = load_image(value, "bgs", resources_folder, fallback_resources_folder, (), False, True) #conf.ui_bgs_sizes[key]
+        ui_bgs[key] = load_image(value, "bgs", resources_folder, fallback_resources_folder, (), False, True)
 
     sfx = {}
     for i in range(len(conf.sfx_keys)):
         sfx[conf.sfx_keys[i]] = load_sfx(conf.sfx_keys[i], "sfx", ".wav", resources_folder, fallback_resources_folder)
 
-    fonts = {}# os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf")
+    fonts = {}
     for i in range(len(conf.fonts_keys)):
         fonts[conf.fonts_keys[i]] = load_font(os.path.join(resources_folder, "other", conf.fonts_names[i] + ".otf"), os.path.join(fallback_resources_folder, "other", conf.fonts_names[i] + ".otf"), conf.fonts_sizes[i])
 
