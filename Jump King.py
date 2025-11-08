@@ -39,16 +39,15 @@ while conf.WINDOW_OPEN:
         conf.time_spent += delta_time
         events = pygame.event.get()
 
-        # If we close the window
         for event in events:
+            # If we close the window
             if event.type == pygame.QUIT:
                 objs.effect.start_fade_out()
                 conf.next_scene = "quit"
                 objs.game_music.play_fadeout()
-
-        # Detect click zdej dela
-        # if detect_click(objs.username_input, events, pygame.mouse.get_pos()):
-        #     print(f"username input was pressed!")
+            
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                set_permission_to_interact(pygame.mouse.get_pos(), objs.login_ui_elements)
 
         objs.username_input.capture_input(events)
         objs.password_input.capture_input(events)

@@ -356,7 +356,8 @@ class DropdownMenu(UIElement):
         self.item_width_limit = self.dimentions[0] - 20 # In pixels
         self.rect_border_width = 5
         self.highlited_item = 0
-        self.rect = pygame.rect.Rect(self.position[0], self.position[1], self.dimentions[0], self.dimentions[1])
+        self.base_rect = pygame.rect.Rect(self.position[0], self.position[1], self.dimentions[0], self.dimentions[1]) # This one is what is always drawn
+        self.rect = self.base_rect # This one is for collisions
         self.selection_rect = pygame.rect.Rect(self.position[0], self.position[1] + self.dimentions[1] - self.rect_border_width, self.dimentions[0], len(items) * self.row_height + 2 * self.rect_border_width)
         self.highlited_rect = pygame.rect.Rect(self.position[0], self.position[1] + self.dimentions[1] + self.highlited_item * self.row_height, self.dimentions[0], self.row_height)
         self.is_anything_highlited = True
@@ -375,12 +376,12 @@ class DropdownMenu(UIElement):
 
         #If the dropdown isn't focused, we draw all corners rounded, and don't display selection rectangle
         if not self.is_focused:
-            pygame.draw.rect(screen, conf.colors[self.color], self.rect, self.rect_border_width, 25)
+            pygame.draw.rect(screen, conf.colors[self.color], self.base_rect, self.rect_border_width, 25)
             self.items_texts[0].draw(screen)
             return
         
         # Otherwise we draw the whole dropdown with all the elements
-        pygame.draw.rect(screen, conf.colors[self.color], self.rect, self.rect_border_width, 0, 25, 25, 0, 0)
+        pygame.draw.rect(screen, conf.colors[self.color], self.base_rect, self.rect_border_width, 0, 25, 25, 0, 0)
         pygame.draw.rect(screen, conf.colors["grey_dark"], self.selection_rect, 0, 0, 0, 0, 25, 25)
         
         if self.is_anything_highlited:
@@ -433,11 +434,12 @@ class DropdownMenu(UIElement):
         self.handle_confirming_selection(pygame.mouse.get_pressed()[0], enter_pressed)
 
     def handle_confirming_selection(self:object, mouse_down:bool, enter_pressed:bool):
-        if (self.last_highlited_change_made_by == "mouse" and mouse_down and self.highlited_rect.collidepoint(pygame.mouse.get_pos())) or (self.last_highlited_change_made_by == "keyboard" and enter_pressed):
-            self.selected_item = self.items[self.highlited_item]
+        if (self.last_highlited_change_made_by == "mouse" and mouse_down and pygame.MOUSEBUTTONDOWN) or (self.last_highlited_change_made_by == "keyboard" and enter_pressed):
             self.is_focused = False
+            self.selected_item = self.items[self.highlited_item]
             self.items_texts[0].text = self.selected_item
             self.items_texts[0].update()
+            self.set_active(False)
 
     def get_active(self:object, events):
         mouse_pos = pygame.mouse.get_pos()
@@ -451,9 +453,11 @@ class DropdownMenu(UIElement):
     
     def set_active(self:object, active_check:bool):
         if active_check:
+            self.rect = pygame.rect.Rect(self.base_rect.x, self.base_rect.y, self.base_rect.width, self.base_rect.height + self.selection_rect.height)
             self.color = "mint_dark"
             self.is_focused = True
         else:
+            self.rect = self.base_rect
             self.color = "grey_dark"
             self.is_focused = False
 

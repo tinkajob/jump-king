@@ -188,32 +188,14 @@ def dynamic_bg_pos(input_pos:tuple [int, int], bg_image:pygame.Surface, opposite
 
     return bg_pos
 
-def detect_click(object: object, events: list[pygame.event.Event], mouse_pos: tuple[int, int]) -> bool:
-    """Detects a true click — pressed inside and released inside the same rect."""
-    clicked = False
-
-    for event in events:
-        # If the mouse is pressed we check whether it was inside
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            object.mouse_down_inside = object.rect.collidepoint(mouse_pos)
-        
-        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            if getattr(object, "mouse_down_inside", False) and object.rect.collidepoint(mouse_pos):
-                clicked = True
-            object.mouse_down_inside = False
-
-    return clicked
-
 def set_permission_to_interact(mouse_pos:tuple[int, int], ui_elements:list):
     # List of all elements that have colliding point (are overlapping) on that point 
     colliding_elements = []
-
     # If item collides we add it to list of colliding points and disable it
     for object in ui_elements:
         if object.rect.collidepoint(mouse_pos):
             colliding_elements.append(object)
             object.interactable = False
-            print(f"colliding with: {object}")
         else:
             object.interactable = True
 
@@ -332,8 +314,7 @@ def update_player_stats(ragequitting:bool = False):
     conf.stats["highest_distance_climbed_in_game"] = max(conf.game_stats["distance_climbed"], conf.stats["highest_distance_climbed_in_game"])
     conf.stats["highest_distance_descended_in_game"] = max(conf.game_stats["distance_descended"], conf.stats["highest_distance_descended_in_game"])
     
-    # Values below will only save/update if we reached end of 
-    # If we finish before we reach the end, stats below this if statement could be saved incorrectly
+    # Values below will only save/update if we reached end of campaign
     if ragequitting:
         return
 
