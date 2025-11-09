@@ -262,7 +262,6 @@ def save_player_stats(PLAYER_NAME:str, saving_reason:str = ""):
 
 def load_player_stats(PLAYER_NAME:str):
     """Loads player stats from its corresponding file"""
-
     is_new_player = False
 
     if PLAYER_NAME != "":
@@ -270,11 +269,11 @@ def load_player_stats(PLAYER_NAME:str):
     else:
         filepath = os.path.join(stats_folder, "guest_stats.json")
 
-    if os.path.exists(filepath):
-        with open(filepath, "r") as file:
-            loaded_stats = json.load(file)
+    loaded_stats = load_json(filepath)
+    if loaded_stats:
         conf.stats.clear()
         conf.stats.update(loaded_stats)
+    
     else:
         # If the player's stats file doesn't exist (new player)
         for stat in def_stats:
@@ -538,9 +537,11 @@ def combine_subrows(occupied_subrows: list, platform:list, min_row_length:int):
 
 # LOADING GAME FILES
 def load_json(filepath:str):
+    """Tries loading JSON file, if it fails returns False."""
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
             return json.load(file)
+    return False
 
 def set_config_values(filepath:str):
     config = load_json(filepath)

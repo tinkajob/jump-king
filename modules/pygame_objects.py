@@ -19,4 +19,6 @@ ui_bgs_images_paths = config.get("ui_backgrounds", {"login": "", "main_menu": ""
 icon_name = config.get("icon")
 babe_position = config.get("babe_position", [])
 
+conf.def_stats = load_json(os.path.join("resources", "other", "def_stats.json"))
+
 tile_images, player_images, babe_images, buttons, scaled_bgs, ui_bgs, sfx, fonts = load_resources()

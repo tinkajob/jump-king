@@ -23,44 +23,7 @@ game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
 }
 stats = {}
 # All-time, preferences, (per-user)
-def_stats = {
-    "password": 0,                              #DONE
-    "volume_master": 0.5,                       #DONE
-    "volume_sfx": 0.1,                          #DONE
-    "volume_music": 0.1,                        #DONE
-    "last_camapaign_played": "main",            
-    "total_playtime": 0,
-    "personal_best_time": 0,
-    "avg_completion_time": 0,
-    "total_jumps": 0,                           #DONE
-    "total_falls": 0,                           #DONE
-    "highest_position": 0,
-    "total_fall_distance": 0,
-    "games_played": 0,                          #DONE
-    "best_jump_streak": 0,
-    "avg_jump_streak": 0,
-    "head_bounces": 0,                          #DONE
-    "wall_bounces": 0,                          #DONE
-    "ragequits": 0,                             #DONE
-    "pause_count": 0,
-    "total_airtime": 0,
-    "longest_airtime": 0,
-    "min_jumps_in_game": 99999999999,           #DONE
-    "max_jumps_in_game": 0,                     #DONE
-    "min_falls_in_game": 99999999999,           #DONE
-    "max_falls_in_game": 0,                     #DONE
-    "avg_airtime": 0,
-    "time_on_endscreen": 0,
-    "games_started": 0, 
-    "finished_games": 0,
-    "finish_rate": 0,
-    "best_screen": 0,                           #DONE
-    "total_distance_climbed": 0,                #DONE
-    "total_distance_descended": 0,              #DONE
-    "highest_distance_climbed_in_game": 0,
-    "highest_distance_descended_in_game": 0,
-    #dodaj se za avg stvari in pogruntej!!!!!
-}
+def_stats = {}
 loaded_player_stats = False
 #============================= OTHER =============================
 
@@ -151,7 +114,7 @@ messages = {
     "err_empty_campaign": f"This campaign has no levels!", 
     "err_no_campaign_selected": f"Please select a campaign to continue!",
     "loaded_music_config": f"Music config loaded successfully!",
-    "endscreen": f"Press any key to continue...",
+    "endscreen": f"Press any key or click to continue...",
 }
 tile_images_paths = [
     "tile_1",
