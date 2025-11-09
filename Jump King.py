@@ -5,7 +5,6 @@ import modules.objects as objs
 import modules.pygame_objects as py_objs
 
 from modules.utils import *
-from modules.objects import login_ui_elements
 
 pygame.init()
 pygame.mixer.init()
@@ -103,8 +102,9 @@ while conf.WINDOW_OPEN:
     conf.current_menu = "main_menu"
     objs.game_music.play_menu(conf.current_menu)
 
-    if not conf.QUITTING_GAME:
+    if not conf.QUITTING_GAME and conf.CAMPAIGN != conf.currently_loaded_campaign:
         py_objs.tile_images, py_objs.player_images, py_objs.babe_images, py_objs.buttons, py_objs.scaled_bgs, py_objs.ui_bgs, py_objs.sfx, py_objs.fonts = load_resources()
+        conf.currently_loaded_campaign = conf.CAMPAIGN
 
     py_objs.clock.tick()
 
@@ -298,6 +298,11 @@ while conf.WINDOW_OPEN:
                 objs.effect.start_fade_out()
                 objs.game_music.play_fadeout()
                 conf.next_scene = "quit"
+            
+            if event.type == pygame.MOUSEBUTTONUP:
+                objs.effect.start_fade_out()
+                objs.game_music.play_fadeout()
+                conf.next_scene = "main_menu"
 
         keys = pygame.key.get_pressed()
 
@@ -329,6 +334,7 @@ while conf.WINDOW_OPEN:
 
         objs.effect.update(delta_time, py_objs.screen)
         pygame.display.flip()
+        # ENDSCREEN ===========================================================================
 
 pygame.mixer.music.stop()
 pygame.quit()

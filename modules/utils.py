@@ -537,18 +537,13 @@ def combine_subrows(occupied_subrows: list, platform:list, min_row_length:int):
     return valid_subrows
 
 # LOADING GAME FILES
-def load_config():
-    if conf.CAMPAIGN:
-        filepath = os.path.join(campaigns_folder, conf.CAMPAIGN, "config.json")
-    else:
-        filepath = os.path.join(campaigns_folder, "config.json")
-
+def load_json(filepath:str):
     if os.path.exists(filepath):
         with open(filepath, "r") as file:
             return json.load(file)
 
-def set_config_values():
-    config = load_config()
+def set_config_values(filepath:str):
+    config = load_json(filepath)
     py_objs.music_level_instructions = config.get("levels_music", [])
     py_objs.music_menus_instructions = config.get("ui_music", {"login": "", "main_menu": "", "endscreen": ""})
     py_objs.bgs_images_paths = config.get("game_backgrounds", [])
@@ -628,7 +623,7 @@ def load_sfx(filepath:str, subfolder:str, format:str, resources_folder:str, fall
 def load_resources():
     resources_folder = os.path.join("campaigns", conf.CAMPAIGN, "resources")
 
-    set_config_values()
+    set_config_values(filepath = os.path.join("campaigns", conf.CAMPAIGN, "config.json"))
     conf.current_level = 0
 
     tile_images = []

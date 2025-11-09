@@ -1,6 +1,7 @@
 #============================= OTHER =============================
 SCREEN_WIDTH, SCREEN_HEIGHT = 1320, 1000
 CAMPAIGN = "main"
+currently_loaded_campaign = ""
 GAME_RUNNING, MAIN_MENU, ENDSCREEN, LOGIN, waiting_for_release, WINDOW_OPEN = False, False, False, True, True, True
 QUITTING_GAME = False
 current_level, current_frame, time_spent = 0, 0, 0
@@ -24,9 +25,10 @@ stats = {}
 # All-time, preferences, (per-user)
 def_stats = {
     "password": 0,                              #DONE
-    "volume_master": 0.5,
-    "volume_sfx": 0.1,
-    "volume_music": 0.1,
+    "volume_master": 0.5,                       #DONE
+    "volume_sfx": 0.1,                          #DONE
+    "volume_music": 0.1,                        #DONE
+    "last_camapaign_played": "main",            
     "total_playtime": 0,
     "personal_best_time": 0,
     "avg_completion_time": 0,
