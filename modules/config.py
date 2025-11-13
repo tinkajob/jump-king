@@ -38,18 +38,6 @@ babe_min_row_length = 5
 VOLUME_MASTER = 0.5
 VOLUME_SFX = 0.1
 VOLUME_MUSIC = 0.1
-musics = {
-    "main_menu":    f"{fallback_resources_folder}/music/main_menu.mp3",
-    "sewer":        f"{fallback_resources_folder}/music/sewer.mp3",
-    "fallen_king":  f"{fallback_resources_folder}/music/fallen_king.mp3",
-    "despair":      f"{fallback_resources_folder}/music/despair.mp3",
-    "masse":        f"{fallback_resources_folder}/music/masse.mp3",
-    "sky_blue":     f"{fallback_resources_folder}/music/sky_blue.mp3",
-    "coronation":   f"{fallback_resources_folder}/music/coronation.mp3",
-    "sunrise":      f"{fallback_resources_folder}/music/sunrise.mp3",
-    "legend":       f"{fallback_resources_folder}/music/a_legend_lives_on.mp3",
-    "zacasno":      f"{fallback_resources_folder}/music/bg_music.mp3",
-}
 music_level_instructions = []
 music_menus_instructions = {}
 can_play_music = True
@@ -61,6 +49,7 @@ sfx_keys = [
     "landing",
     "fall",
 ]
+SUPPORTED_AUDIO_FORMATS = [".mp3", ".wav"]
 #============================= SOUND =============================
 
 #============================= USER INTERFACE =============================

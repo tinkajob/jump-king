@@ -62,7 +62,7 @@ while conf.WINDOW_OPEN:
                 conf.next_scene = log_in(objs.username_input.input_text, objs.password_input.input_text, objs.title, objs.effect, objs.username_input, objs.password_input, conf.stats)
                 
                 # We only want transition if music is different for login and main menu
-                if py_objs.music_menus_instructions["login"] != py_objs.music_menus_instructions["main_menu"]:
+                if py_objs.menu_musics["login"] != py_objs.menu_musics["main_menu"]:
                     objs.game_music.play_fadeout()
                 conf.submit_button_already_clicked = True
                 conf.PLAYER_NAME = objs.username_input.input_text
@@ -147,7 +147,7 @@ while conf.WINDOW_OPEN:
                 py_objs.sfx["click"].play()
 
             # We only want transition if music is different for login and main menu
-            if py_objs.music_menus_instructions["login"] != py_objs.music_menus_instructions["main_menu"]:
+            if py_objs.menu_musics["login"] != py_objs.menu_musics["main_menu"]:
                 objs.game_music.play_fadeout()
             conf.next_scene = "login"
             objs.effect.start_fade_out()

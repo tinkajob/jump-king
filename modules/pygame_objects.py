@@ -12,8 +12,8 @@ bounce_channel = pygame.mixer.Channel(1)
 
 # Load config from .json file
 config = load_json(os.path.join("campaigns", conf.CAMPAIGN, "config.json"))
-music_level_instructions = config.get("levels_music", [])
-music_menus_instructions = config.get("ui_music", {"login": "", "main_menu": "", "endscreen": ""})
+level_musics = config.get("levels_music", [])
+menu_musics = config.get("ui_music", {"login": "", "main_menu": "", "endscreen": ""})
 bgs_images_paths = config.get("game_backgrounds", [])
 ui_bgs_images_paths = config.get("ui_backgrounds", {"login": "", "main_menu": "", "endscreen": ""})
 icon_name = config.get("icon")

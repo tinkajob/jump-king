@@ -545,8 +545,8 @@ def load_json(filepath:str):
 
 def set_config_values(filepath:str):
     config = load_json(filepath)
-    py_objs.music_level_instructions = config.get("levels_music", [])
-    py_objs.music_menus_instructions = config.get("ui_music", {"login": "", "main_menu": "", "endscreen": ""})
+    py_objs.level_musics = config.get("levels_music", [])
+    py_objs.menu_musics = config.get("ui_music", {"login": "", "main_menu": "", "endscreen": ""})
     py_objs.bgs_images_paths = config.get("game_backgrounds", [])
     py_objs.ui_bgs_images_paths = config.get("ui_backgrounds", {"login": "", "main_menu": "", "endscreen": ""})
     py_objs.icon_name = config.get("icon")
@@ -587,14 +587,13 @@ def load_image(filepath:str, subfolder:str, resources_folder:str, fallback_resou
     # If we are given a list of sizes we use this, otherwise if we want to auto scale we call find_background_load_size(). If non of the above we leave default size
     if not size and auto_scale:
         size = find_background_load_size(image, bg_resize_koeficient)
-        
+
     if size:
         image = pygame.transform.scale(image, size)
 
     if preserve_alpha:
         return image.convert_alpha()
-    else:
-        return image.convert()
+    return image.convert()
 
 def load_font(path:str, fallback_path:str, size:int):
     if os.path.exists(path):
