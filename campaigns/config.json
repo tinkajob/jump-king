@@ -11,10 +11,10 @@
         "sewer",
         "sewer"
     ],
-    "COMMENT": "For the backgrounds you need to type in the name of the image you want for your level. (It needs to be in resources/bgs/)(Format (.png, .jpg, ...) wil be added automatically)",
+    "COMMENT": "For the backgrounds you need to type in the name of the image you want for your level. (It needs to be in resources/bgs/)(Format (.png, .jpg, ...) wil be added automatically). If you enter too few background, it will just duplicate the last background untill there are enogh backgrounds. If you enter too many backgrounds, it will use just the backgrounds that it needs",
     "game_backgrounds":[
-        "bg3",
-        "bg3", 
+        "bg0",
+        "bg1", 
         "bg2",
         "bg3",
         "bg4"
@@ -23,5 +23,14 @@
         "login": "login",
         "main_menu": "main_menu", 
         "endscreen": "endscreen"
+    },
+    "babe_position":[
+        1200, 
+        160
+    ],
+    "COMMENT1": "KEYS TO USE: 'login', 'main_menu', 'endscreen', then '0', '1', '2'... for levels",
+    "bg_offsets":{
+        "login": [-150, 0],
+        "main_menu": [-150, 0]
     }
 }

@@ -28,7 +28,7 @@
         1200, 
         160
     ],
-    "COMMENT1": "login, main_menu, endscreen, then levels... (for levels just use level numbers, like '0', '1', '2'...)",
+    "COMMENT1": "KEYS TO USE: 'login', 'main_menu', 'endscreen', then '0', '1', '2'... for levels",
     "bg_offsets":{
         "login": [-150, 0],
         "main_menu": [-150, 0]
