@@ -207,19 +207,18 @@ def set_permission_to_interact(mouse_pos:tuple[int, int], ui_elements:list):
 def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, current_level:int = 0, delta_time:float = 0, events = []):
     """Handles drawing scenes"""
     if scene == "login":
-        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], False, manual_offset = (-150, 0)))
+        screen.blit(ui_bgs["login"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["login"], opposite_dir = False, manual_offset = py_objs.bg_offsets["login"]))
         objs.submit_button.draw(screen)
         objs.quit_button.draw(screen)
         objs.username_input.draw(screen, delta_time)
         objs.password_input.draw(screen, delta_time)
         objs.submit_text.draw(screen)
         objs.quit_text.draw(screen) # Za ta tekst naredi da se narise ze ku poklices button funkcijo (da je kar part od buttona)
-        # objs.cursor.draw(screen, delta_time)
         objs.campaign_dropdown.draw(screen, events)
         objs.notification.draw(screen)
     
     elif scene == "main_menu":
-        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], False, manual_offset = (-150, 0)))
+        screen.blit(ui_bgs["main_menu"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["main_menu"], opposite_dir = False, manual_offset = py_objs.bg_offsets["main_menu"]))
         objs.play_button.draw(screen)
         objs.quit_button.draw(screen)
         objs.logout_button.draw(screen)
@@ -230,7 +229,7 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objs.notification.draw(screen)
 
     elif scene == "running":
-        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objs.player.get_pos(center_pos = True), scaled_bgs[current_level]))
+        screen.blit(scaled_bgs[current_level], dynamic_bg_pos(objs.player.get_pos(center_pos = True), scaled_bgs[current_level], manual_offset = py_objs.bg_offsets[str(current_level)]))
         screen.blit(objs.level_surfaces[current_level], (0, 0))
         objs.player.draw(screen)
         objs.babe.draw(screen, current_level)
@@ -239,7 +238,7 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objs.notification.draw(screen)
     
     elif scene == "endscreen":
-        screen.blit(ui_bgs["endscreen"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["endscreen"], False))
+        screen.blit(ui_bgs["endscreen"], dynamic_bg_pos(pygame.mouse.get_pos(), ui_bgs["endscreen"], opposite_dir = False, manual_offset = py_objs.bg_offsets["endscreen"]))
         objs.notification.draw(screen)
 
 # MANAGING PLAYER STATS
@@ -543,6 +542,28 @@ def load_json(filepath:str):
             return json.load(file)
     return False
 
+def load_offsets(offsets_dict:dict, default_value = (0, 0)):
+    bg_offsets = {}
+    
+    # First we check all existing data
+    for key, value in offsets_dict.items():
+        bg_offsets[key] = tuple(value)
+
+    # Then we handle missing data
+    if not "login" in bg_offsets:
+        bg_offsets["login"] = default_value
+    if not "main_menu" in bg_offsets:
+        bg_offsets["main_menu"] = default_value
+    if not "endscreen" in bg_offsets:
+        bg_offsets["endscreen"] = default_value
+
+    for i in range(len(conf.level_paths)):
+        key = str(i)
+        if not key in bg_offsets:
+            bg_offsets[key] = default_value
+
+    return bg_offsets
+
 def set_config_values(filepath:str):
     config = load_json(filepath)
     py_objs.level_musics = config.get("levels_music", [])
@@ -551,6 +572,7 @@ def set_config_values(filepath:str):
     py_objs.ui_bgs_images_paths = config.get("ui_backgrounds", {"login": "", "main_menu": "", "endscreen": ""})
     py_objs.icon_name = config.get("icon")
     py_objs.babe_position = config.get("babe_position", [])
+    py_objs.bg_offsets = load_offsets(config["bg_offsets"])
 
 def find_background_load_size(image:pygame.surface.Surface, bg_resize_koeficient:float = 1):
     """Find image size in order to fit the whole screen"""

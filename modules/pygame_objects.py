@@ -2,7 +2,7 @@ import pygame, os
 
 import modules.config as conf
 
-from modules.utils import load_json, load_resources
+from modules.utils import load_json, load_resources, load_offsets
 pygame.init()
 
 screen = pygame.display.set_mode((conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT))
@@ -18,6 +18,7 @@ bgs_images_paths = config.get("game_backgrounds", [])
 ui_bgs_images_paths = config.get("ui_backgrounds", {"login": "", "main_menu": "", "endscreen": ""})
 icon_name = config.get("icon")
 babe_position = config.get("babe_position", [])
+bg_offsets = load_offsets(config["bg_offsets"])
 
 conf.def_stats = load_json(os.path.join("resources", "other", "def_stats.json"))
 
