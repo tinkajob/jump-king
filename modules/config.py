@@ -14,12 +14,12 @@ game_stats = { #kar merimo v 1 igri (per-game stats, primer: jumps)
     "falls": 0,
     "head_bounces": 0,
     "wall_bounces": 0,
-    "current_jump_streak": 0,
-    "best_jump_streak": 0,
     "best_screen": 0,
     "distance_climbed": 0,
     "distance_descended": 0,
     "fall_distance": 0,
+    "finish_time": 0,
+    "time_on_endscreen": 0,
 }
 stats = {}
 # All-time, preferences, (per-user)

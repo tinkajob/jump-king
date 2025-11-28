@@ -249,7 +249,7 @@ def save_player_stats(PLAYER_NAME:str, saving_reason:str = ""):
     if saving_reason == "game_ended":
         update_player_stats()
     elif saving_reason == "ragequit":
-        update_player_stats(True)
+        update_player_stats(ragequitting = True)
 
     if PLAYER_NAME != "":
         filepath = os.path.join(stats_folder, f"{PLAYER_NAME}_stats.json")
@@ -316,7 +316,14 @@ def update_player_stats(ragequitting:bool = False):
     
     # Values below will only save/update if we reached end of campaign
     if ragequitting:
+        conf.stats["finish_rate"] = round(conf.stats["games_played"] / conf.stats["games_started"], 3)
         return
+    
+    conf.stats["games_played"] += 1
+    conf.stats["finish_rate"] = round(conf.stats["games_played"] / conf.stats["games_started"], 3)
+
+    conf.stats["personal_best_time"] = min(conf.stats["personal_best_time"], conf.game_stats["finish_time"])
+    conf.stats["time_on_endscreen"] += conf.game_stats["time_on_endscreen"]
 
     conf.stats["min_jumps_in_game"] = min(conf.game_stats["jumps"], conf.stats["min_jumps_in_game"])
     conf.stats["min_falls_in_game"] = min(conf.game_stats["falls"], conf.stats["min_falls_in_game"])

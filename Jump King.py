@@ -242,7 +242,7 @@ while conf.WINDOW_OPEN:
         if objs.babe.check_for_ending(objs.player.get_rect()) == "end_game" and not conf.game_ended and conf.next_scene != "endscreen":
             conf.next_scene = "endscreen"
             objs.effect.start_fade_out()
-            conf.stats["games_played"] += 1
+            conf.game_stats["finish_time"] = time
             objs.player.manage_end_animation(delta_time = 0, stop = True)
             objs.game_music.play_fadeout()
             conf.can_play_music = False
@@ -283,6 +283,9 @@ while conf.WINDOW_OPEN:
     objs.notification.delete_notification()
     objs.notification.show_notification(conf.messages["endscreen"])
 
+    py_objs.clock.tick()
+    finish_time = pygame.time.get_ticks()
+
     while conf.ENDSCREEN:
         # ENDSCREEN ===========================================================================
         delta_time = py_objs.clock.tick(conf.FPS_cap_menus) / 1000.0
@@ -320,6 +323,7 @@ while conf.WINDOW_OPEN:
             conf.next_scene = "main_menu"
 
         if conf.next_scene == "main_menu" and not objs.effect.get_active():
+            conf.game_stats["time_on_endscreen"] = pygame.time.get_ticks() - finish_time
             save_player_stats(conf.PLAYER_NAME, "game_ended")
             conf.ENDSCREEN = False
             conf.MAIN_MENU = True
