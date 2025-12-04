@@ -90,7 +90,6 @@ class PlayerController:
         """Handles player movement based on the input"""
         self.friction = self.check_borders()
 
-
         self.time_since_pressed_left -= delta_time
         self.time_since_pressed_right -= delta_time
 
@@ -149,6 +148,7 @@ class PlayerController:
         else:
             if self.jump_charge > -5:
                 self.jump_charge = -5
+            
             if self.jump_key_pressed and self.touched_floor:
                 self.jump_key_pressed = False
                 self.rect.y -= 1
@@ -263,7 +263,7 @@ class PlayerController:
                 self.has_collided_this_frame = any(self.collisions)
 
                 if self.collisions[0]:
-                    self.touched_floor = True   # za zdej nerabimo cekirat tipov platform, kr so itak samo 1 (bom pol dodau se myb checkpointe in ostale)
+                    self.touched_floor = True
                     self.speed_y = 0
                     self.rect.bottom = platform.rect.top
                     self.has_hit_wall_midair = False
@@ -299,29 +299,22 @@ class PlayerController:
                                 conf.game_stats["wall_bounces"] += self.times_bounced_midair
                                 if conf.current_level + 1 > conf.game_stats["best_screen"]:
                                     conf.game_stats["best_screen"] = conf.current_level + 1
+                                
                         self.speed_x = 0
                     self.times_bounced_midair = 0
                     self.head_bounce = False
                     return
                 
-                if self.collisions[0] and self.collisions[2]:
-                    if dist_x <= dist_y:
-                        self.touched_floor = True
-                        self.speed_y = 0
-                        self.rect.bottom = platform.rect.top
+                if self.collisions[0]:
+                    if not dist_x <= dist_y:
+                        return
                     
-                    else:
+                    if self.collisions[2]:
                         self.rect.right = platform.rect.left
                         self.speed_x *= -0.5
-                    return
-
-                if self.collisions[0] and self.collisions[3]:
-                    if dist_x <= dist_y:
-                        self.touched_floor = True
-                        self.speed_y = 0
-                        self.rect.bottom = platform.rect.top
+                        return
                     
-                    else:
+                    if self.collisions[3]:
                         self.rect.left = platform.rect.right
                         self.speed_x *= -0.5
                     return

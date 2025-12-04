@@ -231,7 +231,7 @@ while conf.WINDOW_OPEN:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 conf.stats["ragequits"] += 1
-                save_player_stats(conf.PLAYER_NAME, "ragequit")
+                save_player_stats(conf.PLAYER_NAME, "ragequit", objs.player.rect.y)
                 objs.game_music.play_fadeout()
                 objs.effect.start_fade_out()
                 conf.next_scene = "quit"

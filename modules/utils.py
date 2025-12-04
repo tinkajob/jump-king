@@ -242,14 +242,14 @@ def draw_scene(scene:str, screen:pygame.Surface, scaled_bgs:list, ui_bgs:list, c
         objs.notification.draw(screen)
 
 # MANAGING PLAYER STATS
-def save_player_stats(PLAYER_NAME:str, saving_reason:str = ""):
+def save_player_stats(PLAYER_NAME:str, saving_reason:str = "", player_position_y = 0):
     """Saves player stats to its corresponding file"""
     os.makedirs(stats_folder, exist_ok=True)
     
     if saving_reason == "game_ended":
         update_player_stats()
     elif saving_reason == "ragequit":
-        update_player_stats(ragequitting = True)
+        update_player_stats(ragequitting = True, player_y = player_position_y)
 
     if PLAYER_NAME != "":
         filepath = os.path.join(stats_folder, f"{PLAYER_NAME}_stats.json")
@@ -292,14 +292,13 @@ def wipe_stats(PLAYER_NAME:str, stats:list, def_stats:list):
         stats[stat] = def_stats[stat]
     save_player_stats(PLAYER_NAME, stats)
 
-def update_player_stats(ragequitting:bool = False):
+def update_player_stats(ragequitting:bool = False, player_y = 0):
     """Updates player stats based on stats from his last game"""
     #tle do pravila za use statse kku se jih zdruzuje
 
     # These values will update even if we ragequit, because they must/can be updated without risk
     conf.stats["total_jumps"] += conf.game_stats["jumps"]
     conf.stats["total_falls"] += conf.game_stats["falls"]
-    
     conf.stats["max_jumps_in_game"] = max(conf.game_stats["jumps"], conf.stats["max_jumps_in_game"])
     conf.stats["max_falls_in_game"] = max(conf.game_stats["falls"], conf.stats["max_falls_in_game"])
     
@@ -307,13 +306,16 @@ def update_player_stats(ragequitting:bool = False):
     conf.stats["wall_bounces"] += conf.game_stats["wall_bounces"]
     
     conf.stats["best_screen"] = max(conf.game_stats["best_screen"], conf.stats["best_screen"])
+    conf.stats["highest_position_percentile"] = round(max(conf.stats["highest_position_percentile"], (conf.current_level * SCREEN_HEIGHT + (SCREEN_HEIGHT - player_y)) / (len(objs.levels) * SCREEN_HEIGHT)), 3)
     
     conf.stats["total_distance_climbed"] += conf.game_stats["distance_climbed"]
     conf.stats["total_distance_descended"] += conf.game_stats["distance_descended"]
-    
     conf.stats["highest_distance_climbed_in_game"] = max(conf.game_stats["distance_climbed"], conf.stats["highest_distance_climbed_in_game"])
     conf.stats["highest_distance_descended_in_game"] = max(conf.game_stats["distance_descended"], conf.stats["highest_distance_descended_in_game"])
-    
+
+    conf.stats["total_playtime"] += conf.game_stats["finish_time"]
+    conf.stats["avg_completion_time"] = conf.stats["total_playtime"] // conf.stats["games_played"]
+
     # Values below will only save/update if we reached end of campaign
     if ragequitting:
         conf.stats["finish_rate"] = round(conf.stats["games_played"] / conf.stats["games_started"], 3)
@@ -327,6 +329,10 @@ def update_player_stats(ragequitting:bool = False):
 
     conf.stats["min_jumps_in_game"] = min(conf.game_stats["jumps"], conf.stats["min_jumps_in_game"])
     conf.stats["min_falls_in_game"] = min(conf.game_stats["falls"], conf.stats["min_falls_in_game"])
+    conf.stats["total_playtime"] += conf.game_stats["finish_time"]
+
+    # Since we reached babe we finished the level
+    conf.stats["highest_position_percentile"] = 1
 
 # LEVELS
 def make_levels(tile_images:list):
