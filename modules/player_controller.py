@@ -23,7 +23,6 @@ class PlayerController:
         self.end_animation_distance_travelled = 0
         self.friction = 1
         self.direction = ""
-        self.is_not_allowed_to_move = ""
         self.touched_floor = False
         self.jump_key_pressed = False
         self.has_fallen = False
@@ -106,12 +105,12 @@ class PlayerController:
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.time_since_pressed_left = 0.1
-            if self.touched_floor and not self.jump_key_pressed and self.is_not_allowed_to_move != "left":
+            if self.touched_floor and not self.jump_key_pressed:
                 self.speed_x = conf.max_speed * -1
 
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.time_since_pressed_right = 0.1
-            if self.touched_floor and not self.jump_key_pressed and self.is_not_allowed_to_move != "right":
+            if self.touched_floor and not self.jump_key_pressed:
                 self.speed_x = conf.max_speed
 
         if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.touched_floor:
@@ -188,10 +187,8 @@ class PlayerController:
 
     def check_borders(self:object):
         """Checks if the player is colliding with window borders"""
-        self.is_not_allowed_to_move = ""
         if self.rect.right > conf.SCREEN_WIDTH: # RIGHT
             self.rect.right = conf.SCREEN_WIDTH
-            self.is_not_allowed_to_move = "right"
             self.has_hit_wall_midair = True
             if self.touched_floor:
                 return 0
@@ -202,7 +199,6 @@ class PlayerController:
         
         if self.rect.left < 0: # LEFT
             self.rect.left = 0
-            self.is_not_allowed_to_move = "left"
             self.has_hit_wall_midair = True 
             if self.touched_floor:
                 self.direction = "left"
@@ -239,109 +235,82 @@ class PlayerController:
         """Checks if the player is colliding with the platforms"""
         self.touched_floor = False
         self.has_collided_prev_frame = self.has_collided_this_frame
+        self.has_collided_this_frame = False
         for platform in objs.level:
-            if not platform.type == 5 or (self.rect.centerx - platform.rect.centerx) ** 2 + (self.rect.centery - platform.rect.centery) ** 2 < 2250: #tle ce pogruntas kire kombinacije sosednjih platform se tudi nemorejo nikoli zgodit (kasni koti - poglej v autotile za stevilko), loh dodas kukr za 5
-                self.collisions[0] = False
-                self.collisions[1] = False
-                self.collisions[2] = False
-                self.collisions[3] = False
-                dist_x = abs(self.rect.centerx - platform.rect.centerx)
-                dist_y = abs(self.rect.centery - platform.rect.centery)
+            # We skip all the inside tiles and those who are too far from us
+            if platform.type == 5 or (self.rect.centerx - platform.rect.centerx) ** 2 + (self.rect.centery - platform.rect.centery) ** 2 > 5000: # We can't collide with platform type 5 (in the middle), and that 5000 is arbitrary, just a big enough to check all surrounding platforms
+                continue
 
-                if self.collision_bottom_rect.colliderect(platform.rect):
-                    self.collisions[0] = True
-                
-                if self.collision_top_rect.colliderect(platform.rect):
-                    self.collisions[1] = True
-                
-                if self.collision_right_rect.colliderect(platform.rect):
-                    self.collisions[2] = True
-                
-                if self.collision_left_rect.colliderect(platform.rect):
-                    self.collisions[3] = True
+            # We find out which sides are we colliding on
+            self.collisions[0] = self.collision_bottom_rect.colliderect(platform.rect)
+            self.collisions[1] = self.collision_top_rect.colliderect(platform.rect)
+            self.collisions[2] = self.collision_right_rect.colliderect(platform.rect)
+            self.collisions[3] = self.collision_left_rect.colliderect(platform.rect)
+            self.has_collided_this_frame = any(self.collisions) if self.has_collided_this_frame != True else True
 
-                self.has_collided_this_frame = any(self.collisions)
+            if self.collisions[0]:
+                self.touched_floor = True
+                self.speed_y = 0
+                self.rect.bottom = platform.rect.top
+                self.has_hit_wall_midair = False
 
-                if self.collisions[0]:
-                    self.touched_floor = True
-                    self.speed_y = 0
-                    self.rect.bottom = platform.rect.top
-                    self.has_hit_wall_midair = False
-
-                    if not self.has_collided_prev_frame: # landing detection, sfx, orientation
-                        self.time_charged = 0
-                        if self.speed_x > 0:
-                            self.direction = "right"
-                        elif self.speed_x < 0:
-                            self.direction = "left"
-                        if (self.rect.y - 20 > self.jumped_from_y and (self.times_bounced_midair >= 2 or self.head_bounce)) or self.jumped_from_level > conf.current_level:   # pravila za fall
-                            self.fell = True
-                            py_objs.sfx["fall"].play()
-                            conf.game_stats["falls"] += 1
-                            conf.game_stats["fall_distance"] += abs(self.jumped_from_y - self.rect.y)
-                        else:
-                            if self.times_bounced_midair % 2 != 0: # pogledamo ce smo se odbili liho stevilo krat, da obrnemo smer
-                                if self.direction == "right":
-                                    self.direction = "left"
-                                elif self.direction == "left":
-                                    self.direction = "right"
-                            if self.has_received_input:
-                                py_objs.sfx["landing"].play()
-                                if self.jumped_from_y - self.rect.y > 5:
-                                    conf.game_stats["distance_climbed"] += self.jumped_from_y - self.rect.y + 1
-                                
-                                elif conf.current_level > self.jumped_from_level: #ce skocimo v nov level
-                                    conf.game_stats["distance_climbed"] += self.jumped_from_y + (1000 - self.rect.y) + 1
-                                
-                                elif self.jumped_from_y - self.rect.y < -5:
-                                    conf.game_stats["distance_descended"] += abs(self.jumped_from_y - self.rect.y) - 1
-
-                                conf.game_stats["wall_bounces"] += self.times_bounced_midair
-                                if conf.current_level + 1 > conf.game_stats["best_screen"]:
-                                    conf.game_stats["best_screen"] = conf.current_level + 1
-                                
-                        self.speed_x = 0
-                    self.times_bounced_midair = 0
-                    self.head_bounce = False
-                    return
-                
-                if self.collisions[0]:
-                    if not dist_x <= dist_y:
-                        return
+                if not self.has_collided_prev_frame: # landing detection, sfx, orientation
+                    self.time_charged = 0
                     
-                    if self.collisions[2]:
-                        self.rect.right = platform.rect.left
-                        self.speed_x *= -0.5
-                        return
-                    
-                    if self.collisions[3]:
-                        self.rect.left = platform.rect.right
-                        self.speed_x *= -0.5
-                    return
-                
-                if self.collisions[1]:
-                    self.speed_y = 1
-                    self.rect.top = platform.rect.bottom
-                    self.head_bounce = True
-                    py_objs.sfx["bounce"].play()
-                    conf.game_stats["head_bounces"] += 1
-                    return
-                
-                if self.collisions[2] and not self.collisions[3]:
-                    self.rect.right = platform.rect.left
-                    self.speed_x *= -0.5
-                    if not self.collisions[0]:
-                        self.has_hit_wall_midair = True
-                        self.times_bounced_midair += 1
-                    return
+                    if self.speed_x != 0:
+                        self.direction = "right" if self.speed_x > 0 else "left"
+                    # If we bounced odd number of times, we switch sides
+                    if self.times_bounced_midair % 2 != 0: 
+                        self.direction = "right" if self.direction == "left" else "left"
 
-                if self.collisions[3] and not self.collisions[2]:
-                    self.rect.left = platform.rect.right
-                    self.speed_x *= -0.5
-                    if not self.collisions[0]:
-                        self.has_hit_wall_midair = True
-                        self.times_bounced_midair += 1
-                    return
+                    # If we fell
+                    fell = (self.rect.y - 20 > self.jumped_from_y and (self.times_bounced_midair >= 2 or self.head_bounce)) or self.jumped_from_level > conf.current_level # Fall rules
+                    if fell:
+                        self.fell = True
+                        py_objs.sfx["fall"].play()
+                        conf.game_stats["falls"] += 1
+                        conf.game_stats["fall_distance"] += abs(self.jumped_from_y - self.rect.y)
+                    
+                    # If we landed successfully
+                    else:
+                        # We increase distances based on where we landed (including screen changes)
+                        screen_change_offset = (conf.current_level - self.jumped_from_level) * conf.SCREEN_HEIGHT
+                        conf.game_stats["distance_climbed"] += max(0, self.jumped_from_y - self.rect.y + screen_change_offset + 1)
+                        conf.game_stats["distance_descended"] += max(0, self.rect.y - self.jumped_from_y - screen_change_offset - 1)
+
+                        conf.game_stats["wall_bounces"] += self.times_bounced_midair
+                        conf.game_stats["best_screen"] = max(conf.current_level, conf.game_stats["best_screen"])
+
+                        py_objs.sfx["landing"].play()
+                            
+                    self.speed_x = 0
+                self.times_bounced_midair = 0
+                self.head_bounce = False
+                return
+            
+            if self.collisions[1]:
+                self.speed_y = 1
+                self.rect.top = platform.rect.bottom
+                self.head_bounce = True
+                py_objs.sfx["bounce"].play()
+                conf.game_stats["head_bounces"] += 1
+                return
+            
+            if self.collisions[2] and not self.collisions[3]:
+                self.rect.right = platform.rect.left
+                self.speed_x *= -0.5
+                if not self.collisions[0]:
+                    self.has_hit_wall_midair = True
+                    self.times_bounced_midair += 1
+                return
+
+            if self.collisions[3] and not self.collisions[2]:
+                self.rect.left = platform.rect.right
+                self.speed_x *= -0.5
+                if not self.collisions[0]:
+                    self.has_hit_wall_midair = True
+                    self.times_bounced_midair += 1
+                return
 
     def get_rect(self:object):
         return self.rect
@@ -391,7 +360,6 @@ class PlayerController:
         self.collisions = [False, False, False, False] #up, down, right, left
         self.direction = ""
         self.has_hit_wall_midair = False
-        self.is_not_allowed_to_move = ""
         self.has_collided_prev_frame, self.has_collided_this_frame = True, False # za sfx, bo se za pristat
         self.times_bounced_midair = 0 # za fall in animation
         self.fell = True

@@ -198,8 +198,8 @@ while conf.WINDOW_OPEN:
 
 
     if not conf.QUITTING_GAME:
-        # That's commented out just because for now we set campaign on the login screen
         objs.babe.find_position(py_objs.babe_position, objs.levels[len(objs.levels) - 1], conf.tile_size, conf.SCREEN_WIDTH, conf.SCREEN_HEIGHT) # Find babe position based on config file or automatically
+    
     py_objs.clock.tick()
 
     while conf.GAME_RUNNING:
