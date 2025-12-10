@@ -275,12 +275,12 @@ def load_player_stats(PLAYER_NAME:str):
     
     else:
         # If the player's stats file doesn't exist (new player)
-        for stat in def_stats:
-            conf.stats[stat] = def_stats[stat]
+        for stat in conf.def_stats:
+            conf.stats[stat] = conf.def_stats[stat]
             is_new_player = True
     
-    #ce trenutno v stats.json ni neke vrednosti (smo na novo uvedli/ponesreci zbrisana), jo nastavimo na fallback vrednost
-    for key, value in def_stats.items():
+    # If a key is missing in the file, we add it with fallback value
+    for key, value in conf.def_stats.items():
         if key not in conf.stats:
             conf.stats[key] = value
     
@@ -314,7 +314,7 @@ def update_player_stats(ragequitting:bool = False, player_y = 0):
     conf.stats["highest_distance_descended_in_game"] = max(conf.game_stats["distance_descended"], conf.stats["highest_distance_descended_in_game"])
 
     conf.stats["total_playtime"] += conf.game_stats["finish_time"]
-    conf.stats["avg_completion_time"] = conf.stats["total_playtime"] // conf.stats["games_played"]
+    conf.stats["avg_completion_time"] = conf.stats["total_playtime"] // max(1, conf.stats["games_played"]) # To prevent division by zero
 
     # Values below will only save/update if we reached end of campaign
     if ragequitting:

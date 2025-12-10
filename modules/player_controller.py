@@ -26,7 +26,7 @@ class PlayerController:
         self.touched_floor = False
         self.jump_key_pressed = False
         self.has_fallen = False
-        self.collisions = [False, False, False, False] #up, down, right, left
+        self.collisions = {"top": False, "bottom": False, "right": False, "left": False}
         self.has_hit_wall_midair = False
         self.has_collided_prev_frame, self.has_collided_this_frame = True, False # za sfx, bo se za pristat
         self.fell = True
@@ -160,12 +160,13 @@ class PlayerController:
                     self.touched_floor = False
                 else:
                     self.speed_x = 0
-                py_objs.sfx["jump"].play()
+                py_objs.sfx_channel.play(py_objs.sfx["jump"])
                 self.jumped_from_y = self.rect.y
                 self.jumped_from_level = conf.current_level
                 conf.game_stats["jumps"] += 1
             else:
                 self.jump_charge = 0
+                self.time_charged = 0
 
         if abs(self.speed_x) < 0.1:
             if self.direction == "":
@@ -194,7 +195,7 @@ class PlayerController:
                 return 0
             else:
                 self.times_bounced_midair += 1
-                py_objs.sfx["bounce"].play()
+                py_objs.bounce_channel.play(py_objs.sfx["bounce"])
                 return -0.5
         
         if self.rect.left < 0: # LEFT
@@ -205,7 +206,7 @@ class PlayerController:
                 return 0
             else:
                 self.times_bounced_midair += 1
-                py_objs.sfx["bounce"].play()
+                py_objs.bounce_channel.play(py_objs.sfx["bounce"])
                 return -0.5
             
         if self.rect.centery > conf.SCREEN_HEIGHT: # BOTTOM
@@ -226,7 +227,7 @@ class PlayerController:
                 self.speed_y = 1
                 self.rect.centery = 1
                 conf.current_level -= 1
-                py_objs.sfx["bounce"].play()
+                py_objs.bounce_channel.play(py_objs.sfx["bounce"])
                 conf.game_stats["head_bounces"] += 1
                 self.head_bounce = True
         return 1
@@ -236,26 +237,26 @@ class PlayerController:
         self.touched_floor = False
         self.has_collided_prev_frame = self.has_collided_this_frame
         self.has_collided_this_frame = False
+        
         for platform in objs.level:
             # We skip all the inside tiles and those who are too far from us
             if platform.type == 5 or (self.rect.centerx - platform.rect.centerx) ** 2 + (self.rect.centery - platform.rect.centery) ** 2 > 5000: # We can't collide with platform type 5 (in the middle), and that 5000 is arbitrary, just a big enough to check all surrounding platforms
                 continue
 
             # We find out which sides are we colliding on
-            self.collisions[0] = self.collision_bottom_rect.colliderect(platform.rect)
-            self.collisions[1] = self.collision_top_rect.colliderect(platform.rect)
-            self.collisions[2] = self.collision_right_rect.colliderect(platform.rect)
-            self.collisions[3] = self.collision_left_rect.colliderect(platform.rect)
-            self.has_collided_this_frame = any(self.collisions) if self.has_collided_this_frame != True else True
+            self.collisions["top"] = self.collision_top_rect.colliderect(platform.rect)
+            self.collisions["bottom"] = self.collision_bottom_rect.colliderect(platform.rect)
+            self.collisions["right"] = self.collision_right_rect.colliderect(platform.rect)
+            self.collisions["left"] = self.collision_left_rect.colliderect(platform.rect)
+            self.has_collided_this_frame = any(self.collisions.values()) if self.has_collided_this_frame == False else True
 
-            if self.collisions[0]:
+            if self.collisions["bottom"]:
                 self.touched_floor = True
                 self.speed_y = 0
                 self.rect.bottom = platform.rect.top
                 self.has_hit_wall_midair = False
 
                 if not self.has_collided_prev_frame: # landing detection, sfx, orientation
-                    self.time_charged = 0
                     
                     if self.speed_x != 0:
                         self.direction = "right" if self.speed_x > 0 else "left"
@@ -267,7 +268,7 @@ class PlayerController:
                     fell = (self.rect.y - 20 > self.jumped_from_y and (self.times_bounced_midair >= 2 or self.head_bounce)) or self.jumped_from_level > conf.current_level # Fall rules
                     if fell:
                         self.fell = True
-                        py_objs.sfx["fall"].play()
+                        py_objs.sfx_channel.play(py_objs.sfx["fall"])
                         conf.game_stats["falls"] += 1
                         conf.game_stats["fall_distance"] += abs(self.jumped_from_y - self.rect.y)
                     
@@ -281,33 +282,33 @@ class PlayerController:
                         conf.game_stats["wall_bounces"] += self.times_bounced_midair
                         conf.game_stats["best_screen"] = max(conf.current_level, conf.game_stats["best_screen"])
 
-                        py_objs.sfx["landing"].play()
+                        py_objs.sfx_channel.play(py_objs.sfx["landing"])
                             
                     self.speed_x = 0
                 self.times_bounced_midair = 0
                 self.head_bounce = False
                 return
             
-            if self.collisions[1]:
+            if self.collisions["top"]:
                 self.speed_y = 1
                 self.rect.top = platform.rect.bottom
                 self.head_bounce = True
-                py_objs.sfx["bounce"].play()
+                py_objs.bounce_channel.play(py_objs.sfx["bounce"])
                 conf.game_stats["head_bounces"] += 1
                 return
             
-            if self.collisions[2] and not self.collisions[3]:
+            if self.collisions["right"] and not self.collisions["left"]:
                 self.rect.right = platform.rect.left
                 self.speed_x *= -0.5
-                if not self.collisions[0]:
+                if not self.collisions["bottom"]:
                     self.has_hit_wall_midair = True
                     self.times_bounced_midair += 1
                 return
 
-            if self.collisions[3] and not self.collisions[2]:
+            if self.collisions["left"] and not self.collisions["right"]:
                 self.rect.left = platform.rect.right
                 self.speed_x *= -0.5
-                if not self.collisions[0]:
+                if not self.collisions["bottom"]:
                     self.has_hit_wall_midair = True
                     self.times_bounced_midair += 1
                 return
@@ -357,10 +358,10 @@ class PlayerController:
         self.jump_key_pressed = False
         self.has_fallen = False
         self.current_frame, self.running_frames = 9, 0
-        self.collisions = [False, False, False, False] #up, down, right, left
+        self.collisions = {"top": False, "bottom": False, "right": False, "left": False}
         self.direction = ""
         self.has_hit_wall_midair = False
-        self.has_collided_prev_frame, self.has_collided_this_frame = True, False # za sfx, bo se za pristat
+        self.has_collided_prev_frame, self.has_collided_this_frame = True, False
         self.times_bounced_midair = 0 # za fall in animation
         self.fell = True
         self.jumped_from_y = 0
